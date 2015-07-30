@@ -42,6 +42,9 @@
     <div class="navbar-header pull-right">
       <ul class="nav pull-left">
         <li class="pull-right">
+          <a href="/upload.jsp" style="color:#fff; margin-top: 5px;"><span class="glyphicon glyphicon-user"></span></a>
+        </li>
+        <li class="pull-right">
           <a href="/upload.jsp" style="color:#fff; margin-top: 5px;"><span class="glyphicon glyphicon-cloud-upload"></span></a>
         </li>
       </ul>
@@ -155,7 +158,7 @@ Welcome!
         ${fn:escapeXml(description)}
       </div>
       <div class="input-group">
-  		<span class="input-group-addon" id="basic-addon1">Link to share:</span>
+  		<span class="input-group-addon" id="basic-addon1"><span class="glyphicon glyphicon-link"></span></span>
   		<input type="text" class="form-control" value="http://www.spherify.co/render.html?blob-key=${fn:escapeXml(blob_key)}" aria-describedby="basic-addon1">
 
 <%
@@ -164,7 +167,7 @@ Welcome!
 
   		<span class="input-group-btn">
   		 <a href="/update.jsp?id=${fn:escapeXml(sid)}">
-	   	 <button class="btn btn-default type="button">Edit</button>
+	   	 <button class="btn btn-default type="button"><span class="glyphicon glyphicon-edit"></span></button>
 	   	 </a>
 	    </span>
 <%

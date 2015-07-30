@@ -74,7 +74,7 @@
 %>
 
 <div class = "subnav" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
-Uploading as: ${fn:escapeXml(user.nickname)}</div>
+Editing as: ${fn:escapeXml(user.nickname)}</div>
 
 
 <form action="/update" method="post">
