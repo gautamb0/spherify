@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/the_m_000/Downloads/appengine-gcs-client-0.4.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/the_m_000/Downloads/objectify-5.1.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/the_m_000/Downloads/guava-18.0.jar"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+</classpath>
