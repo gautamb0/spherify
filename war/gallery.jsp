@@ -94,6 +94,7 @@ Welcome!
           .type(ImageRecord.class) // We want only ImageRecords
           .ancestor(theBook)    // Anyone in this book
           .order("-date")       // Most recent first - date is indexed.
+          .filter("isPrivate", "no")
           .list();
       }
       else
@@ -122,13 +123,13 @@ Welcome!
         for (ImageRecord imageRecord : imageRecords) {
             pageContext.setAttribute("imageRecord_content", imageRecord.perma_url);
             pageContext.setAttribute("blob_key", imageRecord.blob_key);
-            
             String author;
+            String author_id="";
             if (imageRecord.author_nickname == null) {
                 author = "An anonymous person";
             } else {
                 author = imageRecord.author_nickname;
-                String author_id = imageRecord.author_id;
+                author_id = imageRecord.author_id;
                 
                 if (user != null && user.getUserId().equals(author_id)) {
                     author += " (You)";
@@ -142,6 +143,7 @@ Welcome!
                 description = imageRecord.desc;
             }
             pageContext.setAttribute("description", description);
+            pageContext.setAttribute("sid", imageRecord.id);
             System.out.println("author "+ imageRecord.author_nickname);
 %>
 
@@ -155,9 +157,27 @@ Welcome!
       <div class="input-group">
   		<span class="input-group-addon" id="basic-addon1">Link to share:</span>
   		<input type="text" class="form-control" value="http://www.spherify.co/render.html?blob-key=${fn:escapeXml(blob_key)}" aria-describedby="basic-addon1">
-	   </div>
+
+<%
+  if (user != null && user.getUserId().equals(author_id)) {
+%>     
+
+  		<span class="input-group-btn">
+  		 <a href="/update.jsp?id=${fn:escapeXml(sid)}">
+	   	 <button class="btn btn-default type="button">Edit</button>
+	   	 </a>
+	    </span>
+<%
+  } else {
+%>
+
+       	         
+<%
+  }
+%>
     </div>
    </div>
+  </div>
 
 <%
         }

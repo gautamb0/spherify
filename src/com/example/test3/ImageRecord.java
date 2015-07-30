@@ -49,6 +49,7 @@ public class ImageRecord {
   public String blob_key;
   public String perma_url;
   public String desc;
+  @Index public String isPrivate;
   @Index public Date date;
 
   /**
@@ -56,6 +57,7 @@ public class ImageRecord {
    **/
   public ImageRecord() {
 	desc = "No description.";
+	isPrivate = "no";
     date = new Date();
   }
 

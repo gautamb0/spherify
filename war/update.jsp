@@ -58,14 +58,19 @@
     UserService userService = UserServiceFactory.getUserService();
     User user = userService.getCurrentUser();
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+    ImageRecord imageRecord = ObjectifyService.ofy().load().type(ImageRecord.class).parent(theBook).id(id).now();
+    pageContext.setAttribute("perma_url", imageRecord.perma_url);
+    pageContext.setAttribute("blob_key", imageRecord.blob_key);
+    pageContext.setAttribute("desc", imageRecord.desc); 
     if (user != null) {
-        pageContext.setAttribute("user", user);
+        pageContext.setAttribute("user", user);    
         }
-  
-      ImageRecord imageRecord = ObjectifyService.ofy().load().type(ImageRecord.class).parent(theBook).id(id).now();
-            pageContext.setAttribute("perma_url", imageRecord.perma_url);
-            pageContext.setAttribute("blob_key", imageRecord.blob_key);
-            pageContext.setAttribute("desc", imageRecord.desc);               
+  	if(imageRecord.author_id!=null && !imageRecord.author_id.equals(user.getUserId()))
+  	{
+  		throw new Exception("unauthorized");
+  	}
+  	
+              
 %>
 
 <div class = "subnav" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">

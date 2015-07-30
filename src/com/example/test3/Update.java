@@ -21,13 +21,29 @@ public class Update extends HttpServlet {
     String gallery = "home";
     String description = req.getParameter("description");
     String sid = req.getParameter("sid");
+    String isPriv = req.getParameter("isPriv");
+    if(isPriv == null)
+    {
+    	isPriv = "no";
+    }
+    
     System.out.println("sid: "+ sid);
     System.out.println("description: "+description);
     Long id = Long.parseLong(sid);
 	Key<Gallery> theBook = Key.create(Gallery.class, ancestor);
 	imageRecord = ObjectifyService.ofy().load().type(ImageRecord.class).parent(theBook).id(id).now();
 	imageRecord.desc = description;
-
+	if(imageRecord.author_nickname != null)
+	{
+		imageRecord.isPrivate = isPriv;
+	}
+	System.out.println("is private: "+isPriv);
+	
+	if(isPriv.equals("yes"))
+	{
+		gallery=imageRecord.author_nickname;
+	}
+		
     // Use Objectify to save the greeting and now() is used to make the call synchronously as we
     // will immediately get a new page using redirect and we want the data to be present.
     ObjectifyService.ofy().save().entity(imageRecord).now();
