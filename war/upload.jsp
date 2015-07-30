@@ -9,8 +9,8 @@
 <%@ page import="com.google.appengine.api.blobstore.BlobstoreService" %>
 
 <%-- //[START imports]--%>
-<%@ page import="com.example.test3.Greeting" %>
-<%@ page import="com.example.test3 	.Guestbook" %>
+<%@ page import="com.example.test3.ImageRecord" %>
+<%@ page import="com.example.test3.Gallery" %>
 <%@ page import="com.googlecode.objectify.Key" %>
 <%@ page import="com.googlecode.objectify.ObjectifyService" %>
 <%-- //[END imports]--%>
@@ -52,21 +52,23 @@
 
 
 <%
-    String guestbookName = request.getParameter("guestbookName");
-    if (guestbookName == null) {
-        guestbookName = "default";
-    }
-    pageContext.setAttribute("guestbookName", guestbookName);
+
     UserService userService = UserServiceFactory.getUserService();
     User user = userService.getCurrentUser();
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     if (user != null) {
         pageContext.setAttribute("user", user);
+        pageContext.setAttribute("nickname", user.getNickname());
         }
+    else
+    {
+    	pageContext.setAttribute("nickname", "an anonymous person");
+    }
+        
 %>
 
 <div class = "subnav" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
-Uploading as: ${fn:escapeXml(user.nickname)}</div>
+Uploading as: ${fn:escapeXml(nickname)}</div>
 
 <form class="input-group" action="<%= blobstoreService.createUploadUrl("/upload") %>" method="post" enctype="multipart/form-data">
          <input class="form-control" accept="image/*" type="file" name="myFile" aria-label="file-field" />

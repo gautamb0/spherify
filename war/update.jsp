@@ -9,8 +9,8 @@
 <%@ page import="com.google.appengine.api.blobstore.BlobstoreService" %>
 
 <%-- //[START imports]--%>
-<%@ page import="com.example.test3.Greeting" %>
-<%@ page import="com.example.test3.Guestbook" %>
+<%@ page import="com.example.test3.ImageRecord" %>
+<%@ page import="com.example.test3.Gallery" %>
 <%@ page import="com.googlecode.objectify.Key" %>
 <%@ page import="com.googlecode.objectify.ObjectifyService" %>
 <%-- //[END imports]--%>
@@ -52,11 +52,9 @@
     String sid = request.getParameter("id");
     Long id = Long.parseLong(sid);
     pageContext.setAttribute("sid", sid);
-	String guestbookName = request.getParameter("guestbookName");
-    if (guestbookName == null) {
-        guestbookName = "default";
-    }
-	Key<Guestbook> theBook = Key.create(Guestbook.class, guestbookName);
+	String ancestor = "default";
+    
+	Key<Gallery> theBook = Key.create(Gallery.class, ancestor);
     UserService userService = UserServiceFactory.getUserService();
     User user = userService.getCurrentUser();
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
@@ -64,11 +62,10 @@
         pageContext.setAttribute("user", user);
         }
   
-      Greeting greeting = ObjectifyService.ofy().load().type(Greeting.class).parent(theBook).id(id).now();
-            pageContext.setAttribute("gallery", guestbookName);
-            pageContext.setAttribute("perma_url", greeting.perma_url);
-            pageContext.setAttribute("blob_key", greeting.blob_key);
-            pageContext.setAttribute("desc", greeting.desc);               
+      ImageRecord imageRecord = ObjectifyService.ofy().load().type(ImageRecord.class).parent(theBook).id(id).now();
+            pageContext.setAttribute("perma_url", imageRecord.perma_url);
+            pageContext.setAttribute("blob_key", imageRecord.blob_key);
+            pageContext.setAttribute("desc", imageRecord.desc);               
 %>
 
 <div class = "subnav" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
@@ -79,7 +76,6 @@ Uploading as: ${fn:escapeXml(user.nickname)}</div>
   <div class="input-group">
   <span class="input-group-addon" id="basic-addon1">Edit description:</span>
   <input type="text" class="form-control" aria-describedby="basic-addon1" name="description" value="${fn:escapeXml(desc)}"></div>
-  <input type="hidden" class="form-control" name="gallery" aria-label="gallery-field" value="${fn:escapeXml(gallery)}"/>
   <input type="hidden" class="form-control" name="sid" aria-label="sid-field" value="${fn:escapeXml(sid)}"/>
 <input type="submit" class="form-control" aria-label="submit-button" value="Submit">
 </form>

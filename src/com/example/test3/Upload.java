@@ -45,7 +45,7 @@ public class Upload extends HttpServlet {
         java.lang.System.out.println("image url: "+imageUrl);
         java.lang.System.out.println("blob-key: "+ blobString);
         
-        Greeting greeting;
+        ImageRecord imageRecord;
 
         UserService userService = UserServiceFactory.getUserService();
         User user = userService.getCurrentUser();
@@ -53,16 +53,16 @@ public class Upload extends HttpServlet {
         String guestbookName = "default";//req.getParameter("guestbookName");
         //String content = req.getParameter("content");
         if (user != null) {
-          greeting = new Greeting(guestbookName, blobString, imageUrl, user.getUserId(), user.getNickname());
-        } else {
-          greeting = new Greeting(guestbookName, blobString, imageUrl);
+          imageRecord = new ImageRecord(guestbookName, blobString, imageUrl, user.getUserId(), user.getNickname(), user.getEmail());
+        } else {	
+          imageRecord = new ImageRecord(guestbookName, blobString, imageUrl);
         }
-        java.lang.System.out.println("id: "+greeting.id);
+        java.lang.System.out.println("id: "+imageRecord.id);
         // Use Objectify to save the greeting and now() is used to make the call synchronously as we
         // will immediately get a new page using redirect and we want the data to be present.
-        ObjectifyService.ofy().save().entity(greeting).now();
+        ObjectifyService.ofy().save().entity(imageRecord).now();
         //if (blobKeys == null || blobKeys.isEmpty()) {
-        res.sendRedirect("/update.jsp?id="+greeting.id+"&guestbookName=default");
+        res.sendRedirect("/update.jsp?id="+imageRecord.id);
        // } else {
          //   res.sendRedirect("/serve?blob-key=" + blobKeys.get(0).getKeyString());
         //}

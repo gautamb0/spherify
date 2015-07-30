@@ -9,8 +9,8 @@
 <%@ page import="com.google.appengine.api.blobstore.BlobstoreService" %>
 
 <%-- //[START imports]--%>
-<%@ page import="com.example.test3.Greeting" %>
-<%@ page import="com.example.test3 	.Guestbook" %>
+<%@ page import="com.example.test3.ImageRecord" %>
+<%@ page import="com.example.test3.Gallery" %>
 <%@ page import="com.googlecode.objectify.Key" %>
 <%@ page import="com.googlecode.objectify.ObjectifyService" %>
 <%-- //[END imports]--%>
@@ -36,7 +36,7 @@
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header pull-left">
-      <a class="navbar-brand" href="#"><img src="/images/logo.jpg" alt="spherify" style="object-fit: contain;height: 40px;"></img></a>
+      <a class="navbar-brand" href="/"><img src="/images/logo.jpg" alt="spherify" style="object-fit: contain;height: 40px;"></img></a>
     </div>
     <!-- 'Sticky' (non-collapsing) right-side menu item(s) -->
     <div class="navbar-header pull-right">
@@ -50,11 +50,12 @@
 </nav>
 <div class = "subnav" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
 <%
-    String guestbookName = request.getParameter("gallery");
-    if (guestbookName == null) {
-        guestbookName = "default";
+    String galleryName = request.getParameter("gallery");
+    String ancestor = "default";
+    if (galleryName == null) {
+        galleryName = "home";
     }
-    pageContext.setAttribute("guestbookName", guestbookName);
+    pageContext.setAttribute("galleryName", galleryName);
     UserService userService = UserServiceFactory.getUserService();
     User user = userService.getCurrentUser();
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
@@ -83,32 +84,32 @@ Welcome!
 <%-- //[START datastore]--%>
 <%
     // Create the correct Ancestor key
-      Key<Guestbook> theBook = Key.create(Guestbook.class, "default");
-	  List<Greeting> greetings;
+      Key<Gallery> theBook = Key.create(Gallery.class, ancestor);
+	  List<ImageRecord> imageRecords;
     // Run an ancestor query to ensure we see the most up-to-date
-    // view of the Greetings belonging to the selected Guestbook.
-      if(guestbookName.equals("default")){
-         greetings = ObjectifyService.ofy()
+    // view of the ImageRecords belonging to the selected Gallery.
+      if(galleryName.equals("home")){
+         imageRecords = ObjectifyService.ofy()
           .load()
-          .type(Greeting.class) // We want only Greetings
+          .type(ImageRecord.class) // We want only ImageRecords
           .ancestor(theBook)    // Anyone in this book
           .order("-date")       // Most recent first - date is indexed.
           .list();
       }
       else
       {
-		  greetings = ObjectifyService.ofy()
+		  imageRecords = ObjectifyService.ofy()
           .load()
-          .type(Greeting.class) // We want only Greetings
+          .type(ImageRecord.class) // We want only ImageRecords
           .ancestor(theBook)    // Anyone in this book
-          .filter("author_email", guestbookName)
+          .filter("author_nickname", galleryName)
           .order("-date")       // Most recent first - date is indexed.
           .list();
       }
 
-    if (greetings.isEmpty()) {
+    if (imageRecords.isEmpty()) {
 %>
-<p>No pictures in '${fn:escapeXml(guestbookName)}'. Upload a sphere now!</p>
+<p>No pictures in '${fn:escapeXml(galleryName)}'. Upload a sphere now!</p>
 <%
     } else {
 %>
@@ -117,37 +118,37 @@ Welcome!
   
  
  <%
-      // Look at all of our greetings
-        for (Greeting greeting : greetings) {
-            pageContext.setAttribute("greeting_content", greeting.perma_url);
-            pageContext.setAttribute("blob_key", greeting.blob_key);
+      // Look at all of our imageRecords
+        for (ImageRecord imageRecord : imageRecords) {
+            pageContext.setAttribute("imageRecord_content", imageRecord.perma_url);
+            pageContext.setAttribute("blob_key", imageRecord.blob_key);
             
             String author;
-            if (greeting.author_email == null) {
+            if (imageRecord.author_nickname == null) {
                 author = "An anonymous person";
             } else {
-                author = greeting.author_email;
-                String author_id = greeting.author_id;
+                author = imageRecord.author_nickname;
+                String author_id = imageRecord.author_id;
                 
                 if (user != null && user.getUserId().equals(author_id)) {
                     author += " (You)";
                 }
             }
-            pageContext.setAttribute("greeting_user", author);
+            pageContext.setAttribute("imageRecord_user", author);
             String description;
-            if (greeting.desc == null) {
+            if (imageRecord.desc == null) {
                 description = "No description.";
             } else {
-                description = greeting.desc;
+                description = imageRecord.desc;
             }
             pageContext.setAttribute("description", description);
-            System.out.println("author "+ greeting.author_email);
+            System.out.println("author "+ imageRecord.author_nickname);
 %>
 
    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
     <div class="thumbnail">
       <a target='_blank' href='/render.html?blob-key=${fn:escapeXml(blob_key)}'>
-     <img src="${fn:escapeXml(greeting_content)}" alt="${fn:escapeXml(blob_key)}"></a>
+     <img src="${fn:escapeXml(imageRecord_content)}" alt="${fn:escapeXml(blob_key)}"></a>
       <div class="caption">
         ${fn:escapeXml(description)}
       </div>
