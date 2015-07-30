@@ -28,6 +28,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
+<%
+    String galleryName = request.getParameter("gallery");
+    String ancestor = "default";
+    if (galleryName == null) {
+        galleryName = "home";
+    }
+    pageContext.setAttribute("galleryName", galleryName);
+    UserService userService = UserServiceFactory.getUserService();
+    User user = userService.getCurrentUser();
+    BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+%>
+
+
 <body style="background-color:#f9f9f9;">
  	<script src="js/third-party/jquery-1.11.3.min.js"></script>
     <script src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
@@ -45,30 +58,31 @@
           <a href="/upload.jsp" style="color:#fff; margin-top: 5px;"><span class="glyphicon glyphicon-user"></span></a>
         </li>
         <li class="pull-right">
-          <a href="/upload.jsp" style="color:#fff; margin-top: 5px;"><span class="glyphicon glyphicon-cloud-upload"></span></a>
+<%
+    if (user != null) {
+      pageContext.setAttribute("user", user);
+%>
+          <a href="/gallery.jsp?gallery=${fn:escapeXml(user.nickname)}" style="color:#fff; margin-top: 5px;">
+<%
+	} else {
+%>          
+          <a href="<%= userService.createLoginURL(request.getRequestURI()) %>" style="color:#fff; margin-top: 5px;">
+<%
+	}
+%>          
+          <span class="glyphicon glyphicon-cloud-upload"></span></a>
         </li>
       </ul>
 	  </div>
      </div>
 </nav>
+
 <div class = "subnav" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
+
 <%
-    String galleryName = request.getParameter("gallery");
-    String ancestor = "default";
-    if (galleryName == null) {
-        galleryName = "home";
-    }
-    pageContext.setAttribute("galleryName", galleryName);
-    UserService userService = UserServiceFactory.getUserService();
-    User user = userService.getCurrentUser();
-    BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     if (user != null) {
-        pageContext.setAttribute("user", user);
+      pageContext.setAttribute("user", user);
 %>
-
-
-
-
 Welcome, ${fn:escapeXml(user.nickname)}! Not you?
     <a href="<%= userService.createLogoutURL(request.getRequestURI()) %>">Sign out</a>.
 <%
@@ -76,8 +90,7 @@ Welcome, ${fn:escapeXml(user.nickname)}! Not you?
 %>
 
 Welcome!
-    <a href="<%= userService.createLoginURL(request.getRequestURI()) %>">Sign in</a>
-    to manage your images
+    <a href="<%= userService.createLoginURL(request.getRequestURI()) %>">Sign in</a> to manage your images
 <%
     }
 %>
