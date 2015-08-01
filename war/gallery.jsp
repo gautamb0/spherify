@@ -55,9 +55,6 @@
     <div class="navbar-header pull-right">
       <ul class="nav pull-left">
         <li class="pull-right">
-          <a href="/upload.jsp" style="color:#fff; margin-top: 5px;"><span class="glyphicon glyphicon-user"></span></a>
-        </li>
-        <li class="pull-right">
 <%
     if (user != null) {
       pageContext.setAttribute("user", user);
@@ -70,7 +67,10 @@
 <%
 	}
 %>          
-          <span class="glyphicon glyphicon-cloud-upload"></span></a>
+          <span class="glyphicon glyphicon-user"></span></a>
+        </li>
+        <li class="pull-right">
+          <a href="/upload.jsp" style="color:#fff; margin-top: 5px;"><span class="glyphicon glyphicon-upload"></span></a>
         </li>
       </ul>
 	  </div>
@@ -180,10 +180,10 @@ Welcome!
 
   		<span class="input-group-btn">
   		 <a href="/update.jsp?id=${fn:escapeXml(sid)}">
-	   	 <button class="btn btn-default type="button"><span class="glyphicon glyphicon-edit"></span></button>
+	   	 <button class="btn btn-default type="button">&nbsp;<span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
 	   	 </a>
 	    </span>
-<%
+<%	
   } else {
 %>
 

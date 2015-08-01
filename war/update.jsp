@@ -27,27 +27,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-<body style="background-color:#f9f9f9;">
- 	<script src="js/third-party/jquery-1.11.3.min.js"></script>
-    <script src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
-
-<nav class="navbar navbar-default" style="margin-bottom: 0;">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header pull-left">
-      <a class="navbar-brand" href="/gallery.jsp"><img src="/images/logo.jpg" alt="spherify" style="object-fit: contain;height: 40px;"></img></a>
-    </div>
-    <!-- 'Sticky' (non-collapsing) right-side menu item(s) -->
-    <div class="navbar-header pull-right">
-      <ul class="nav pull-left">
-        <li class="pull-right">
-          <a href="/gallery.jsp" style="color:#fff; margin-top: 5px;"><span class="glyphicon glyphicon-home"></span></a>
-        </li>
-      </ul>
-	  </div>
-     </div>
-  </div>
-</nav>
 <%
     String sid = request.getParameter("id");
     Long id = Long.parseLong(sid);
@@ -72,6 +51,39 @@
   	
               
 %>
+
+<body style="background-color:#f9f9f9;">
+ 	<script src="js/third-party/jquery-1.11.3.min.js"></script>
+    <script src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+
+<nav class="navbar navbar-default" style="margin-bottom: 0;">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header pull-left">
+      <a class="navbar-brand" href="/"><img src="/images/logo.jpg" alt="spherify" style="object-fit: contain;height: 40px;"></img></a>
+    </div>
+    <!-- 'Sticky' (non-collapsing) right-side menu item(s) -->
+    <div class="navbar-header pull-right">
+      <ul class="nav pull-left">
+        <li class="pull-right">
+<%
+    if (user != null) {
+      pageContext.setAttribute("user", user);
+%>
+          <a href="/gallery.jsp?gallery=${fn:escapeXml(user.nickname)}" style="color:#fff; margin-top: 5px;">
+<%
+	} else {
+%>          
+          <a href="<%= userService.createLoginURL(request.getRequestURI()) %>" style="color:#fff; margin-top: 5px;">
+<%
+	}
+%>          
+          <span class="glyphicon glyphicon-user"></span></a>
+        </li>
+      </ul>
+	  </div>
+   </div>
+</nav>
 
 <div class = "subnav" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
 Editing as: ${fn:escapeXml(user.nickname)}</div>
