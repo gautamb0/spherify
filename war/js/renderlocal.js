@@ -4,23 +4,8 @@ var camera, scene, renderer;
     
     var clock = new THREE.Clock();
     var iden = document.getElementById('iden').innerHTML;
-    var blobKey = getUrlParameter('blob-key');
-    var localPath = getUrlParameter('local-path');
-    var imagePath;
-    if(blobKey!=null)
-    {
-    	 imagePath = "/serve?blob-key="+blobKey;
-    }
-    else
-    {
-    	imagePath = localPath;
-    }
-    console.log(blobKey);
-    console.log(imagePath);
-    init();
-    animate();
 
-    function init() {
+    function initlocal(imagePath) {
       renderer = new THREE.WebGLRenderer();
       element = renderer.domElement;
       container = document.getElementById('example');

@@ -85,20 +85,32 @@
    </div>
 </nav>
 
-<div class = "subnav" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
+<nav>
+<div class = "container-fluid page-header" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
 Editing as: ${fn:escapeXml(user.nickname)}</div>
-
+</nav>
 
 <form action="/update" method="post">
   <div class="input-group">
-  <span class="input-group-addon" id="basic-addon1">Edit description:</span>
-  <input type="text" class="form-control" aria-describedby="basic-addon1" name="description" value="${fn:escapeXml(desc)}"></div>
+    <span class="input-group-addon" id="basic-addon1">Edit description:</span>
+    <input type="text" class="form-control" aria-describedby="basic-addon1" name="description" value="${fn:escapeXml(desc)}">
+  </div>
+  <!--<div class="container-fluid">
+  	<input type="checkbox" aria-label="..." name="display" value="delete">Delete this sphere
+  </div>-->
   <input type="hidden" class="form-control" name="sid" aria-label="sid-field" value="${fn:escapeXml(sid)}"/>
-<input type="submit" class="form-control" aria-label="submit-button" value="Submit">
+  <input type="submit" class="form-control" aria-label="submit-button" value="Submit">
 </form>
 
-<div class="update">Link to share: <input type="text" name="link" value="http://www.spherify.co/render.html?blob-key=${fn:escapeXml(blob_key)}" />
+ <div class="input-group">
+  		<span class="input-group-addon" id="basic-addon1">Share:</span>
+  		<input type="text" class="form-control" value="http://www.spherify.co/render.html?blob-key=${fn:escapeXml(blob_key)}" aria-describedby="basic-addon1">
 </div>
+ <div class="input-group">
+  		<span class="input-group-addon" id="basic-addon1">Embed:</span>
+  		<input type="text" class="form-control" value='<iframe src="http://www.spherify.co/render.html?blob-key=${fn:escapeXml(blob_key)}" style="border:none" width="640" height="400"</iframe>' aria-describedby="basic-addon1">
+</div>
+
 
 <div class="row" id="imgContainer">
 	<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">

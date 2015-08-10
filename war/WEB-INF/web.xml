@@ -36,7 +36,22 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 		<servlet-name>Serve</servlet-name>
 		<url-pattern>/serve</url-pattern>
 	</servlet-mapping>
-    <servlet>
+	<servlet>
+		<servlet-name>Delete</servlet-name>
+		<servlet-class>com.example.test3.Delete</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Delete</servlet-name>
+		<url-pattern>/delete</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>UpdateProfile</servlet-name>
+		<servlet-class>com.example.test3.UpdateProfile</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UpdateProfile</servlet-name>
+		<url-pattern>/updateprofile</url-pattern>
+	</servlet-mapping><servlet>
        <servlet-name>guestbook</servlet-name>
       <servlet-class>com.example.test3.GuestbookServlet</servlet-class>
     </servlet>

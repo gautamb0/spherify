@@ -56,7 +56,7 @@ public class ImageRecord {
    * Simple constructor just sets the date
    **/
   public ImageRecord() {
-	desc = "No description.";
+	desc = "";
 	isPrivate = "no";
     date = new Date();
   }

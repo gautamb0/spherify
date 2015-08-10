@@ -46,7 +46,14 @@
 <body style="background-color:#f9f9f9;">
  	<script src="js/third-party/jquery-1.11.3.min.js"></script>
     <script src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+ 	<div id="iden" style="display: none;">1</div>
+    <div id="example"></div>
 
+  <script src="js/third-party/threejs/three.js"></script>
+  <script src="js/third-party/threejs/StereoEffect.js"></script>
+  <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+  <script src="js/third-party/threejs/OrbitControls.js"></script>
+  <script src="js/renderlocal.js"></script>
 <nav class="navbar navbar-default" style="margin-bottom: 0;">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -81,32 +88,46 @@
 Uploading as: ${fn:escapeXml(nickname)}</div>
 
 <form class="input-group" action="<%= blobstoreService.createUploadUrl("/upload") %>" method="post" enctype="multipart/form-data">
-         <input class="form-control" accept="image/*" type="file" name="myFile" aria-label="file-field" />
+<% if(user!=null){ %>
+         <input class="form-control" accept="image/*" type="file" name="myFile" aria-label="file-field" multiple />
+<% } else { %>
+		 <input class="form-control" accept="image/*" type="file" name="myFile" aria-label="file-field"/>
+<% } %>
          <input class="form-control" type="submit" value="Upload" aria-label="submit-button" />
-     </form>
-<div hidden class="row" id="imgContainer">
-	<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-    	<div class="thumbnail">
-     		<img id="myImg" src="#" alt="your image" /></img>
-     	</div>
-     </div>
-</div>
-     
- <script>
+</form>
+<div class="row">
+ <output id="list"></output>
+</div>     
+<script>
+
  $(function () {
     $(":file").change(function () {
-        if (this.files && this.files[0]) {
-            var reader = new FileReader();
-            reader.onload = imageIsLoaded;
-            reader.readAsDataURL(this.files[0]);
+		var parent = document.getElementById('list');
+		while (parent.firstChild) {
+    		parent.removeChild(parent.firstChild);
+		}
+        for (var i = 0, f; f = this.files[i]; i++) {
+        	if (this.files && this.files[i]) {
+            	var reader = new FileReader();
+                reader.onload = imageIsLoaded;
+                reader.readAsDataURL(this.files[i]);
+            }
         }
     });
 });
 
 function imageIsLoaded(e) {
-    $('#myImg').attr('src', e.target.result);
-    $('#imgContainer').show();
+    //$('#myImg').attr('src', e.target.result);
+    //initlocal(e.target.result);
+    //animate();
+    //$('#imgContainer').show();
+    
+    var span = document.createElement('span');
+    span.innerHTML = ['<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3"><div class="thumbnail"><img id="myImg" src="',e.target.result,'" alt="your image" /></img></div></div>'].join('');
+	document.getElementById('list').insertBefore(span, list.childNodes[0]);
 };
+
+
 </script>
  </body>
 </html>

@@ -10,7 +10,9 @@
 
 <%-- //[START imports]--%>
 <%@ page import="com.example.test3.ImageRecord" %>
+<%@ page import="com.example.test3.UserRecord" %>
 <%@ page import="com.example.test3.Gallery" %>
+<%@ page import="com.example.test3.Userbase" %>
 <%@ page import="com.googlecode.objectify.Key" %>
 <%@ page import="com.googlecode.objectify.ObjectifyService" %>
 <%-- //[END imports]--%>
@@ -44,7 +46,68 @@
 <body style="background-color:#f9f9f9;">
  	<script src="js/third-party/jquery-1.11.3.min.js"></script>
     <script src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+    <script src="js/third-party/equalize.min.js"></script>
+	<script>
+  	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
+ 	ga('create', 'UA-64190024-2', 'auto');
+  	ga('send', 'pageview');
+
+	</script>
+	
+	<script>
+	
+	    function getUrlParameter(sParam)
+    {
+        var sPageURL = window.location.search.substring(1);
+        var sURLVariables = sPageURL.split('&');
+        for (var i = 0; i < sURLVariables.length; i++) 
+        {
+            var sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] == sParam) 
+            {
+                return sParameterName[1];
+            }
+        }
+    } 
+	
+function deleteImg(sid) {
+    var r = confirm("Are you sure you want to delete this photosphere?");
+    if(r == true)
+    {
+    	xmlhttp=new XMLHttpRequest();
+    	xmlhttp.open("POST","/delete",true);
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		xmlhttp.send("sid="+sid+"&gallery="+getUrlParameter('gallery'));
+		location.reload();
+    }
+}
+
+function showEdit() {
+	$('#bio').hide();
+	$('#bioedit').show();
+}
+
+function hideEdit() {
+	$('#bio').show();
+	$('#bioedit').hide();
+}
+
+function saveBio()
+{
+	hideEdit();
+	var newBio = $('#bioTextarea').val();
+	$('#bioStatic').html(newBio);
+	xmlhttp=new XMLHttpRequest();
+    xmlhttp.open("POST","/updateprofile",true);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	xmlhttp.send("bio="+newBio+"&gallery="+getUrlParameter('gallery'));
+}
+
+</script>
 <nav class="navbar navbar-default" style="margin-bottom: 0;">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -130,7 +193,48 @@ Welcome!
 <%
     } else {
 %>
- <div class="container-fluid">
+<div class="container-fluid">
+
+<% 
+if(!galleryName.equals("home")) { 
+
+		Key<Userbase> theBase = Key.create(Userbase.class, "default"); 
+		UserRecord userRecord = ObjectifyService.ofy().load().type(UserRecord.class).parent(theBase).id(galleryName).now();
+		if(userRecord == null)
+		{
+			
+			pageContext.setAttribute("bio", galleryName+" has not entered a bio yet.");
+		}
+		else
+		{
+			pageContext.setAttribute("bio", userRecord.bio);
+		}
+
+%>
+  <div class="panel panel-default">
+  <div class="panel-heading">
+  <h3 class="panel-title">${fn:escapeXml(galleryName)}'s Gallery</h4>
+  </div>
+<% 
+	if(user != null && galleryName.equals(user.getNickname())) {
+
+%>  
+  <div id="bio">
+  	<button class="btn btn-default pull-right" type="button" onclick="showEdit()"><span class="glyphicon glyphicon-edit"></span></button>
+  	<div class="panel-body" id="bioStatic">${fn:escapeXml(bio)}</div>
+  </div>
+  <div id="bioedit" style="display:none">
+  	<textarea style="width:100%" id="bioTextarea">${fn:escapeXml(bio)}</textarea><button class="btn btn-default pull-right" type="button" onclick="saveBio()"><span class="glyphicon glyphicon-ok"></span></button><button class="btn btn-default pull-right" type="button" onclick="hideEdit()"><span class="glyphicon glyphicon-remove"></span></button></span>
+  </div>
+<% } else { %>
+
+  <div id="bio">
+  	<div class="panel-body">${fn:escapeXml(bio)}</div>
+  </div>
+<% 	 } %>  
+</div>
+
+<% } %>
 <div class="row">
   
  
@@ -142,7 +246,7 @@ Welcome!
             String author;
             String author_id="";
             if (imageRecord.author_nickname == null) {
-                author = "An anonymous person";
+                author = "an anonymous person";
             } else {
                 author = imageRecord.author_nickname;
                 author_id = imageRecord.author_id;
@@ -161,12 +265,20 @@ Welcome!
             pageContext.setAttribute("description", description);
             pageContext.setAttribute("sid", imageRecord.id);
             System.out.println("author "+ imageRecord.author_nickname);
+            pageContext.setAttribute("author", author);
+            pageContext.setAttribute("nickname", imageRecord.author_nickname);
 %>
 
-   <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-    <div class="thumbnail">
+   <div class="cells col-xs-12 col-sm-6 col-md-4 col-lg-3">
+
+    <div class="thumbnail" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;" >
+<% if (galleryName.equals("home")&&imageRecord.author_nickname == null) { %>
+    Spherified by ${fn:escapeXml(author)}
+<% } else if(galleryName.equals("home")){ %>
+    Spherified by <b><a href='/gallery.jsp?gallery=${fn:escapeXml(nickname)}'>${fn:escapeXml(author)}</a></b>
+<% } %>
       <a target='_blank' href='/render.html?blob-key=${fn:escapeXml(blob_key)}'>
-     <img src="${fn:escapeXml(imageRecord_content)}" alt="${fn:escapeXml(blob_key)}"></a>
+     <img style="height:180px;" src="${fn:escapeXml(imageRecord_content)}" alt="${fn:escapeXml(blob_key)}"></a>
       <div class="caption">
         ${fn:escapeXml(description)}
       </div>
@@ -175,9 +287,13 @@ Welcome!
   		<input type="text" class="form-control" value="http://www.spherify.co/render.html?blob-key=${fn:escapeXml(blob_key)}" aria-describedby="basic-addon1">
 
 <%
-  if (user != null && user.getUserId().equals(author_id)) {
+  if (user != null && user.getUserId().equals("118036154284494619751")| (user != null && user.getUserId().equals(author_id))) {
 %>     
 
+  		<span class="input-group-btn">
+
+	   	 <button class="btn btn-default type="button" onclick="deleteImg(${fn:escapeXml(sid)})">&nbsp;<span class="glyphicon glyphicon-trash"></span>&nbsp;</button>
+	    </span>
   		<span class="input-group-btn">
   		 <a href="/update.jsp?id=${fn:escapeXml(sid)}">
 	   	 <button class="btn btn-default type="button">&nbsp;<span class="glyphicon glyphicon-edit"></span>&nbsp;</button>

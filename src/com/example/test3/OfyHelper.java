@@ -33,6 +33,7 @@ public class OfyHelper implements ServletContextListener {
     // request if no warmup request was invoked.
     ObjectifyService.register(Gallery.class);
     ObjectifyService.register(ImageRecord.class);
+    ObjectifyService.register(UserRecord.class);
   }
 
   public void contextDestroyed(ServletContextEvent event) {
