@@ -4,11 +4,22 @@ var camera, scene, renderer;
     
     var clock = new THREE.Clock();
     var iden = document.getElementById('iden').innerHTML;
-
-    function initlocal(imagePath) {
+    var mesh = null;
+    var index = getUrlParameter('index');
+    if(index==null)
+    {
+    	index = 0;
+    }
+    var drag = false;
+    function initlocal() {
+      
+      document.getElementById("examplee").addEventListener("mousedown", function(){drag=false;});
+      document.getElementById("examplee").addEventListener("mouseup", myFunction);
+      document.getElementById("examplee").addEventListener("mousemove", function(){drag=true;});
+      //$("#examplee").on("tap",myFunction);
       renderer = new THREE.WebGLRenderer();
       element = renderer.domElement;
-      container = document.getElementById('example');
+      container = document.getElementById('examplee');
       container.appendChild(element);
       
       effect = new THREE.StereoEffect(renderer);
@@ -32,17 +43,7 @@ var camera, scene, renderer;
       
       window.addEventListener('deviceorientation', setOrientationControls, true);
       
-      var texture = THREE.ImageUtils.loadTexture(imagePath);
-      var material = new THREE.MeshBasicMaterial({
-          map: texture
-        });
 
-        var geometry = new THREE.SphereGeometry(100, 32, 32);
-        var mesh = new THREE.Mesh(geometry, material);
-        mesh.scale.x = -1;
-        
-        scene.add(mesh);
-        
       function setOrientationControls(e) {
         if (!e.alpha) {
           return;
@@ -52,15 +53,16 @@ var camera, scene, renderer;
         controls.connect();
         controls.update();
 
-        element.addEventListener('click', fullscreen, false);
+        container.addEventListener('click', console.log("clicj"), false);
 
         window.removeEventListener('deviceorientation', setOrientationControls, true);
       }
      
       window.addEventListener('resize', resize, false);
       setTimeout(resize, 1);
-    }
-
+      changeSphere();
+    }	
+    
     function resize() {
       var width = container.offsetWidth;
       var height = container.offsetHeight;
@@ -115,4 +117,68 @@ var camera, scene, renderer;
                 return sParameterName[1];
             }
         }
-    }   
+    }
+    
+    function nextSphere()
+    {
+    	if(index<blob_keys.length-1)
+    	{
+    		index++;
+    		changeSphere();
+    	}  
+    }
+    
+    function changeSphere(){
+    	if(mesh)
+    	{
+    		scene.remove(mesh);
+    	}
+    	var imagePath = "/serve?blob-key="+blob_keys[index];
+      	var texture = THREE.ImageUtils.loadTexture(imagePath);
+      	var material = new THREE.MeshBasicMaterial({
+          map: texture
+        });
+
+        var geometry = new THREE.SphereGeometry(100, 32, 32);
+        mesh = new THREE.Mesh(geometry, material);
+        mesh.scale.x = -1;
+        
+        scene.add(mesh);
+      }
+    
+    document.addEventListener("keydown", keyboardResponse, false);
+    
+    function keyboardResponse(e) {
+        switch(e.keyCode) {
+            case 37:
+                // left key pressed
+            	if(index>0)
+            	{
+            		index--;
+            		changeSphere();
+            	}
+                break;
+            case 38:
+                // up key pressed
+                break;
+            case 39:
+            	if(index<blob_keys.length-1)
+            	{
+            		index++;
+            		changeSphere();
+            	}
+                // right key pressed
+                break;
+            case 40:
+                // down key pressed
+                break;  
+        }   
+    }
+    
+    function myFunction() {
+    	if(!drag)
+    	{
+    	nextSphere();
+        console.log("click");
+    	}
+    }

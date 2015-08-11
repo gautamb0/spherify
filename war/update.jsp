@@ -21,6 +21,7 @@
 <html>
 <title>Spherify | Edit</title>
 <head>
+    <link href='http://fonts.googleapis.com/css?family=Pontano+Sans' rel='stylesheet' type='text/css'>
     <link href="bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet"/>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">

@@ -213,7 +213,7 @@ if(!galleryName.equals("home")) {
 %>
   <div class="panel panel-default">
   <div class="panel-heading">
-  <h3 class="panel-title">${fn:escapeXml(galleryName)}'s Gallery</h4>
+  <h3 class="panel-title">${fn:escapeXml(galleryName)}'s Gallery</h3>
   </div>
 <% 
 	if(user != null && galleryName.equals(user.getNickname())) {
@@ -234,17 +234,26 @@ if(!galleryName.equals("home")) {
 <% 	 } %>  
 </div>
 
+<% } 
+	if(galleryName.equals("home")) {
+%>
+<div class="panel panel-default list-group-item-info" id="info"><span class="glyphicon glyphicon-remove pull-right" onclick="$('#info').hide()"></span><span class="glyphicon glyphicon-info-sign"></span>Tap an image and place your phone in your cardboard to get started. Tap the screen to go to the next image in the gallery, or use left/right keys if available.</div>
 <% } %>
+
 <div class="row">
   
  
  <%
       // Look at all of our imageRecords
+      int index = 0;
         for (ImageRecord imageRecord : imageRecords) {
+        	
+        	pageContext.setAttribute("index", index);
             pageContext.setAttribute("imageRecord_content", imageRecord.perma_url);
             pageContext.setAttribute("blob_key", imageRecord.blob_key);
             String author;
             String author_id="";
+            
             if (imageRecord.author_nickname == null) {
                 author = "an anonymous person";
             } else {
@@ -267,6 +276,7 @@ if(!galleryName.equals("home")) {
             System.out.println("author "+ imageRecord.author_nickname);
             pageContext.setAttribute("author", author);
             pageContext.setAttribute("nickname", imageRecord.author_nickname);
+            index++;
 %>
 
    <div class="cells col-xs-12 col-sm-6 col-md-4 col-lg-3">
@@ -277,7 +287,7 @@ if(!galleryName.equals("home")) {
 <% } else if(galleryName.equals("home")){ %>
     Spherified by <b><a href='/gallery.jsp?gallery=${fn:escapeXml(nickname)}'>${fn:escapeXml(author)}</a></b>
 <% } %>
-      <a target='_blank' href='/render.html?blob-key=${fn:escapeXml(blob_key)}'>
+      <a target='_blank' href='/slideshow.jsp?gallery=${fn:escapeXml(galleryName)}&index=${fn:escapeXml(index)}'>
      <img style="height:180px;" src="${fn:escapeXml(imageRecord_content)}" alt="${fn:escapeXml(blob_key)}"></a>
       <div class="caption">
         ${fn:escapeXml(description)}
