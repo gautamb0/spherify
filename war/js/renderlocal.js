@@ -149,6 +149,7 @@ var camera, scene, renderer;
     document.addEventListener("keydown", keyboardResponse, false);
     
     function keyboardResponse(e) {
+
         switch(e.keyCode) {
             case 37:
                 // left key pressed

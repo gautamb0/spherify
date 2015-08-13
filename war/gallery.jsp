@@ -21,13 +21,14 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <html>
-<title>Spherify your world | VR for everyone</title>
+<title>Spherify | View and Share Photospheres on Cardboard</title>
 <head>
 	<link href='http://fonts.googleapis.com/css?family=Pontano+Sans' rel='stylesheet' type='text/css'>
     <link href="bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet"/>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Spherify - An easy-to-use Photosphere viewer and sharing service for Cardboard that works with any phone in the browser.">
 </head>
 
 <%
@@ -59,7 +60,7 @@
 	</script>
 	
 	<script>
-	
+	var images = [];
 	    function getUrlParameter(sParam)
     {
         var sPageURL = window.location.search.substring(1);
@@ -106,6 +107,12 @@ function saveBio()
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 	xmlhttp.send("bio="+newBio+"&gallery="+getUrlParameter('gallery'));
 }
+
+$(window).scroll(function () {
+
+	var page = 0;
+	
+});
 
 </script>
 <nav class="navbar navbar-default" style="margin-bottom: 0;">
@@ -233,14 +240,13 @@ if(!galleryName.equals("home")) {
   </div>
 <% 	 } %>  
 </div>
+ 
+<% } else { %>
+<div class="panel panel-default list-group-item-info" id="info"><span class="glyphicon glyphicon-remove pull-right" onclick="$('#info').hide()"></span><span class="glyphicon glyphicon-info-sign"></span>Tap an image and place your phone in your cardboard to get started. Tap the screen to go to the next image in the gallery, or use left/right keys on PC.</div>
 
-<% } 
-	if(galleryName.equals("home")) {
-%>
-<div class="panel panel-default list-group-item-info" id="info"><span class="glyphicon glyphicon-remove pull-right" onclick="$('#info').hide()"></span><span class="glyphicon glyphicon-info-sign"></span>Tap an image and place your phone in your cardboard to get started. Tap the screen to go to the next image in the gallery, or use left/right keys if available.</div>
 <% } %>
 
-<div class="row">
+<div class="row" id="result">
   
  
  <%
@@ -278,7 +284,15 @@ if(!galleryName.equals("home")) {
             pageContext.setAttribute("nickname", imageRecord.author_nickname);
             index++;
 %>
-
+			<script>
+			var image;
+			image.description = ${fn:escapeXml(description)};
+			image.sid = ${fn:escapeXml(sid)};
+			image.author = ${fn:escapeXml(author)};
+			image.nickname = ${fn:escapeXml(nickname)};
+			images.push(image);
+			</script>
+ 
    <div class="cells col-xs-12 col-sm-6 col-md-4 col-lg-3">
 
     <div class="thumbnail" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;" >
@@ -310,13 +324,9 @@ if(!galleryName.equals("home")) {
 	   	 </a>
 	    </span>
 <%	
-  } else {
-%>
-
-       	         
-<%
   }
 %>
+    	         
     </div>
    </div>
   </div>
