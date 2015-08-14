@@ -48,19 +48,20 @@
  	<script src="js/third-party/jquery-1.11.3.min.js"></script>
     <script src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
     <script src="js/third-party/equalize.min.js"></script>
-	<script>
-  	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
- 	ga('create', 'UA-64190024-2', 'auto');
-  	ga('send', 'pageview');
+  ga('create', 'UA-64190024-2', 'auto');
+  ga('send', 'pageview');
 
-	</script>
+</script>
 	
 	<script>
 	var images = [];
+	
 	    function getUrlParameter(sParam)
     {
         var sPageURL = window.location.search.substring(1);
@@ -108,10 +109,39 @@ function saveBio()
 	xmlhttp.send("bio="+newBio+"&gallery="+getUrlParameter('gallery'));
 }
 
-$(window).scroll(function () {
+function nextPage()
+{
+	numCols = Math.floor(screen.width/$('.cells').width());
+	numRows = Math.ceil(screen.height/$('.cells').height());
+	picsPerPage = numCols * numRows;
+	//console.log(numCols);
+	//console.log(numRows);
+	//console.log(picsPerPage);
+	for(x=0;x<picsPerPage;x++)
+	{
+		if(index>=images.length)
+		{
+			break;
+		}
+		appendImg(images[index].author, images[index].nickname, images[index].description, images[index].perma_url, images[index].blob_key, images[index].index, images[index].sid,images[index].you);
+		index++;
+	}
 
-	var page = 0;
-	
+}
+
+$(window).scroll(function () {
+	console.log($(window).scrollTop());
+	console.log($(window).height());
+	console.log($(document).height());
+	console.log(screen.height);
+	console.log(screen.width);
+	//console.log($('.cells').height());
+	//console.log($('.cells').width());
+	if($(window).scrollTop() + screen.height >= $(document).height() - 100) {
+		
+		console.log("next page");
+		nextPage();
+	}
 });
 
 </script>
@@ -128,12 +158,13 @@ $(window).scroll(function () {
 <%
     if (user != null) {
       pageContext.setAttribute("user", user);
+      pageContext.setAttribute("user_id", user.getUserId());
 %>
-          <a href="/gallery.jsp?gallery=${fn:escapeXml(user.nickname)}" style="color:#fff; margin-top: 5px;">
+          <a href="/gallery.jsp?gallery=${fn:escapeXml(user.nickname)}" style="color:#fff; margin-top: 5px;"></a>
 <%
 	} else {
 %>          
-          <a href="<%= userService.createLoginURL(request.getRequestURI()) %>" style="color:#fff; margin-top: 5px;">
+          <a href="<%= userService.createLoginURL(request.getRequestURI()) %>" style="color:#fff; margin-top: 5px;"></a>
 <%
 	}
 %>          
@@ -146,7 +177,41 @@ $(window).scroll(function () {
 	  </div>
      </div>
 </nav>
-
+<script>
+function appendImg(author, nickname, description, perma_url, blob_key, index, sid, you)
+{
+	var imgEl = "";
+	imgEl+="<div class=\"cells col-xs-12 col-sm-6 col-md-4 col-lg-3\">";
+	imgEl+="<div class=\"thumbnail\" style=\"white-space: nowrap;overflow:hidden;text-overflow: ellipsis;\">";
+	
+	if ("${fn:escapeXml(galleryName)}"=="home"&&nickname =="")
+	{
+		imgEl+="Spherified by "+author;
+	}
+	else if("${fn:escapeXml(galleryName)}"=="home")
+	{
+		imgEl+="Spherified by <b><a href='/gallery.jsp?gallery="+nickname+"'>"+author+"</a></b>";
+	}
+	
+	imgEl+="<a target='_blank' href='/slideshow.jsp?gallery=${fn:escapeXml(galleryName)}&index="+index+"'>";
+	imgEl+="<img style=\"height:180px;\" src=\""+perma_url+"\" alt=\""+blob_key+"\"></a>";
+	imgEl+="<div class=\"caption\">"+description+"</div>";
+	imgEl+="<div class=\"input-group\"><span class=\"input-group-addon\" id=\"basic-addon1\"><span class=\"glyphicon glyphicon-link\"></span></span>";
+	imgEl+="<input type=\"text\" class=\"form-control\" value=\"http://www.spherify.co/render.html?blob-key="+blob_key+"\" aria-describedby=\"basic-addon1\">";
+		
+	if (you=="1")
+	{
+		imgEl+= "<span class=\"input-group-btn\">";
+		imgEl+= "<button class=\"btn btn-default type=\"button\" onclick=\"deleteImg("+sid+")\">&nbsp;<span class=\"glyphicon glyphicon-trash\"></span>&nbsp;</button></span>";
+		imgEl+= "<span class=\"input-group-btn\"><a href=\"/update.jsp?id="+sid+"\">";
+		imgEl+= "<button class=\"btn btn-default\" type=\"button\">&nbsp;<span class=\"glyphicon glyphicon-edit\"></span>&nbsp;</button></a></span>"
+	}
+	
+	imgEl+="</div></div></div>";
+	
+	$("#imgGrid").append(imgEl);
+}
+</script>
 <div class = "subnav" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
 
 <%
@@ -242,32 +307,33 @@ if(!galleryName.equals("home")) {
 </div>
  
 <% } else { %>
-<div class="panel panel-default list-group-item-info" id="info"><span class="glyphicon glyphicon-remove pull-right" onclick="$('#info').hide()"></span><span class="glyphicon glyphicon-info-sign"></span>Tap an image and place your phone in your cardboard to get started. Tap the screen to go to the next image in the gallery, or use left/right keys on PC.</div>
+<div class="panel panel-default list-group-item-info" id="info"><span class="glyphicon glyphicon-remove pull-right" onclick="$('#info').hide()"></span><span class="glyphicon glyphicon-info-sign"></span>Tap an image and place your phone in your cardboard to get started. Tap the screen to go to the next image in the gallery, or use left/right keys on PC.
+</div>
 
 <% } %>
 
-<div class="row" id="result">
-  
- 
  <%
       // Look at all of our imageRecords
       int index = 0;
         for (ImageRecord imageRecord : imageRecords) {
         	
         	pageContext.setAttribute("index", index);
-            pageContext.setAttribute("imageRecord_content", imageRecord.perma_url);
+            pageContext.setAttribute("perma_url", imageRecord.perma_url);
             pageContext.setAttribute("blob_key", imageRecord.blob_key);
-            String author;
+            pageContext.setAttribute("you", "0");
+            String author="";
             String author_id="";
-            
+            String nickname ="";
             if (imageRecord.author_nickname == null) {
                 author = "an anonymous person";
+                
             } else {
                 author = imageRecord.author_nickname;
                 author_id = imageRecord.author_id;
-                
+                nickname = imageRecord.author_nickname;
                 if (user != null && user.getUserId().equals(author_id)) {
                     author += " (You)";
+                    pageContext.setAttribute("you", "1");
                 }
             }
             pageContext.setAttribute("imageRecord_user", author);
@@ -279,65 +345,45 @@ if(!galleryName.equals("home")) {
             }
             pageContext.setAttribute("description", description);
             pageContext.setAttribute("sid", imageRecord.id);
-            System.out.println("author "+ imageRecord.author_nickname);
             pageContext.setAttribute("author", author);
+            pageContext.setAttribute("author_id", author_id);
             pageContext.setAttribute("nickname", imageRecord.author_nickname);
             index++;
 %>
 			<script>
-			var image;
-			image.description = ${fn:escapeXml(description)};
-			image.sid = ${fn:escapeXml(sid)};
-			image.author = ${fn:escapeXml(author)};
-			image.nickname = ${fn:escapeXml(nickname)};
+			var image={};
+			image.description = "${fn:escapeXml(description)}";
+			image.sid = "${fn:escapeXml(sid)}";
+			image.author = "${fn:escapeXml(author)}";
+			image.nickname = "${fn:escapeXml(nickname)}";
+			image.you = "${fn:escapeXml(you)}";
+			image.blob_key = "${fn:escapeXml(blob_key)}";
+			image.index = "${fn:escapeXml(index)}";
+			image.perma_url = "${fn:escapeXml(perma_url)}";
+			images.sid = "${fn:escapeXml(sid)}";
 			images.push(image);
 			</script>
- 
-   <div class="cells col-xs-12 col-sm-6 col-md-4 col-lg-3">
-
-    <div class="thumbnail" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;" >
-<% if (galleryName.equals("home")&&imageRecord.author_nickname == null) { %>
-    Spherified by ${fn:escapeXml(author)}
-<% } else if(galleryName.equals("home")){ %>
-    Spherified by <b><a href='/gallery.jsp?gallery=${fn:escapeXml(nickname)}'>${fn:escapeXml(author)}</a></b>
-<% } %>
-      <a target='_blank' href='/slideshow.jsp?gallery=${fn:escapeXml(galleryName)}&index=${fn:escapeXml(index)}'>
-     <img style="height:180px;" src="${fn:escapeXml(imageRecord_content)}" alt="${fn:escapeXml(blob_key)}"></a>
-      <div class="caption">
-        ${fn:escapeXml(description)}
-      </div>
-      <div class="input-group">
-  		<span class="input-group-addon" id="basic-addon1"><span class="glyphicon glyphicon-link"></span></span>
-  		<input type="text" class="form-control" value="http://www.spherify.co/render.html?blob-key=${fn:escapeXml(blob_key)}" aria-describedby="basic-addon1">
-
-<%
-  if (user != null && user.getUserId().equals("118036154284494619751")| (user != null && user.getUserId().equals(author_id))) {
-%>     
-
-  		<span class="input-group-btn">
-
-	   	 <button class="btn btn-default type="button" onclick="deleteImg(${fn:escapeXml(sid)})">&nbsp;<span class="glyphicon glyphicon-trash"></span>&nbsp;</button>
-	    </span>
-  		<span class="input-group-btn">
-  		 <a href="/update.jsp?id=${fn:escapeXml(sid)}">
-	   	 <button class="btn btn-default type="button">&nbsp;<span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
-	   	 </a>
-	    </span>
-<%	
-  }
-%>
-    	         
-    </div>
-   </div>
-  </div>
 
 <%
         }
     }
 %>
 
+
+
+<div class="row" id="imgGrid">
 </div>
+
+<script>
+var index = 0;
+appendImg(images[index].author, images[index].nickname, images[index].description, images[index].perma_url, images[index].blob_key, images[index].index, images[index].sid,images[index].you);
+index++;
+nextPage();
+</script>
 </div>
 </body>
 </html>
 <%-- //[END all]--%>
+
+
+
