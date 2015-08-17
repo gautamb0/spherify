@@ -25,7 +25,7 @@ public class Delete extends HttpServlet {
 		  ImageRecord imageRecord; 	
 
 		  String ancestor = "default";
-		  String gallery = req.getParameter("sid");
+		  String gallery = req.getParameter("gallery");
 		  String sid = req.getParameter("sid");
 		  
 		  if(gallery==null)

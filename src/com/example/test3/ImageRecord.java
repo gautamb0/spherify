@@ -25,6 +25,7 @@ import com.googlecode.objectify.Key;
 import java.lang.String;
 import java.util.Date;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * The @Entity tells Objectify about our entity.  We also register it in OfyHelper.java -- very
@@ -39,7 +40,7 @@ import java.util.List;
  * Jackson, wants us to write a BeanSerializaer for cloud endpoints.s
  **/
 @Entity
-public class ImageRecord {
+public class ImageRecord implements Comparable<ImageRecord> {
   @Parent Key<Gallery> theBook;
   @Id public Long id;
 
@@ -49,7 +50,11 @@ public class ImageRecord {
   public String blob_key;
   public String perma_url;
   public String desc;
+  public int likes;
+  public List<String> likedUsers;
+  
   @Index public String isPrivate;
+  public String isUnlisted;
   @Index public Date date;
 
   /**
@@ -57,8 +62,11 @@ public class ImageRecord {
    **/
   public ImageRecord() {
 	desc = "";
-	isPrivate = "no";
+	likedUsers = new Vector<String>();;
+	isPrivate = "yes";
+	isUnlisted = "yes";
     date = new Date();
+    likes = 0;
   }
 
   /**
@@ -94,5 +102,12 @@ public class ImageRecord {
 	  desc = description;
   }
   
-
+  public int compareTo(ImageRecord imageRecord)
+  {
+	  
+	  return ((ImageRecord)imageRecord).likes - this.likes;
+  }
+  
+  
+  
 }

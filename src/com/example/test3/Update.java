@@ -8,9 +8,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.api.blobstore.BlobKey;
-import com.google.appengine.api.blobstore.BlobstoreService;
-import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 
@@ -18,7 +15,6 @@ import com.googlecode.objectify.ObjectifyService;
 public class Update extends HttpServlet {
   
 
-	private BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     ImageRecord imageRecord;
 
@@ -26,31 +22,33 @@ public class Update extends HttpServlet {
     String gallery = "home";
     String description = req.getParameter("description");
     String sid = req.getParameter("sid");
-    String isPriv = req.getParameter("isPriv");
-    String display = req.getParameter("display");
-    if(isPriv == null)
+    String isPrivate = "no";
+    String isUnlisted = "no";
+    String notPrivate = req.getParameter("notPrivate");
+    String notUnlisted = req.getParameter("notUnlisted");
+    if(notPrivate==null)
     {
-    	isPriv = "no";
+    	isPrivate = "yes";
     }
-    
+    if(notUnlisted==null)
+    {
+    	isUnlisted = "yes";
+    }
     
     
     System.out.println("sid: "+ sid);
     System.out.println("description: "+description);
-    System.out.println("diaplay: "+display);
+    
     Long id = Long.parseLong(sid);
 	Key<Gallery> theBook = Key.create(Gallery.class, ancestor);
 	imageRecord = ObjectifyService.ofy().load().type(ImageRecord.class).parent(theBook).id(id).now();
 	imageRecord.desc = description;
-	
 
-	if(imageRecord.author_nickname != null)
-	{
-		imageRecord.isPrivate = isPriv;
-	}
-	System.out.println("is private: "+isPriv);
-	
-	if(isPriv.equals("yes"))
+	imageRecord.isPrivate = isPrivate;
+	imageRecord.isUnlisted = isUnlisted;
+	System.out.println("is private: "+isPrivate);
+	System.out.println("is private: "+imageRecord.isUnlisted);
+	if(isPrivate.equals("yes"))
 	{
 		gallery=imageRecord.author_nickname;
 	}

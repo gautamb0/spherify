@@ -73,7 +73,7 @@ public class Upload extends HttpServlet {
       	}
       	else
       	{
-      		res.sendRedirect("/update.jsp?id="+imageRecord.id);
+      		res.sendRedirect("/update.jsp?id="+imageRecord.id+"&firsttime=true");
       	}
       	
     }
