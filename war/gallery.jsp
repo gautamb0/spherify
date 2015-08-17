@@ -5,6 +5,7 @@
 <%@ page import="com.google.appengine.api.users.UserServiceFactory" %>
 
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Collections" %>
 <%@ page import="com.google.appengine.api.blobstore.BlobstoreServiceFactory" %>
 <%@ page import="com.google.appengine.api.blobstore.BlobstoreService" %>
 
@@ -29,6 +30,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Spherify - An easy-to-use Photosphere viewer and sharing service for Cardboard that works with any phone in the browser.">
+	<style>.col-centered{
+float: none;
+margin: 0 auto;
+}</style>
 </head>
 
 <%
@@ -88,6 +93,7 @@ function deleteImg(sid) {
     }
 }
 
+
 function showEdit() {
 	$('#bio').hide();
 	$('#bioedit').show();
@@ -123,23 +129,16 @@ function nextPage()
 		{
 			break;
 		}
-		appendImg(images[index].author, images[index].nickname, images[index].description, images[index].perma_url, images[index].blob_key, images[index].index, images[index].sid,images[index].you);
+		appendImg(images[index].author, images[index].nickname, images[index].description, images[index].perma_url, images[index].blob_key, images[index].index, images[index].sid,images[index].you,images[index].likes,images[index].liked);
 		index++;
 	}
 
 }
 
 $(window).scroll(function () {
-	console.log($(window).scrollTop());
-	console.log($(window).height());
-	console.log($(document).height());
-	console.log(screen.height);
-	console.log(screen.width);
-	//console.log($('.cells').height());
-	//console.log($('.cells').width());
+	
 	if($(window).scrollTop() + screen.height >= $(document).height() - 100) {
-		
-		console.log("next page");
+	
 		nextPage();
 	}
 });
@@ -160,11 +159,11 @@ $(window).scroll(function () {
       pageContext.setAttribute("user", user);
       pageContext.setAttribute("user_id", user.getUserId());
 %>
-          <a href="/gallery.jsp?gallery=${fn:escapeXml(user.nickname)}" style="color:#fff; margin-top: 5px;"></a>
+          <a href="/gallery.jsp?gallery=${fn:escapeXml(user.nickname)}" style="color:#fff; margin-top: 5px;">
 <%
 	} else {
 %>          
-          <a href="<%= userService.createLoginURL(request.getRequestURI()) %>" style="color:#fff; margin-top: 5px;"></a>
+          <a href="<%= userService.createLoginURL(request.getRequestURI()) %>" style="color:#fff; margin-top: 5px;">
 <%
 	}
 %>          
@@ -178,36 +177,99 @@ $(window).scroll(function () {
      </div>
 </nav>
 <script>
-function appendImg(author, nickname, description, perma_url, blob_key, index, sid, you)
+
+function likeImg(sid, index)
+{
+	//console.log("${fn:escapeXml(user.nickname)}");
+	xmlhttp=new XMLHttpRequest();
+	xmlhttp.open("POST","/like",true);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	xmlhttp.send("sid="+sid+"&user="+"${fn:escapeXml(user.nickname)}");
+	var textEl = document.getElementById("likes_"+index);
+	
+	var iconEl = document.getElementById("likeIcon_"+index);
+	iconEl.setAttribute("onclick","");
+	
+	iconEl.className="glyphicon glyphicon-heart";
+	
+	oldLikes = parseInt(textEl.innerHTML);
+	
+	if(textEl.innerHTML=="")
+	{
+		textEl.innerHTML = "1 like";
+	}
+	else
+	{
+		oldLikes++;
+		textEl.innerHTML = oldLikes+" likes";
+	}
+}
+
+
+function appendImg(author, nickname, description, perma_url, blob_key, index, sid, you, likes, liked)
 {
 	var imgEl = "";
-	imgEl+="<div class=\"cells col-xs-12 col-sm-6 col-md-4 col-lg-3\">";
-	imgEl+="<div class=\"thumbnail\" style=\"white-space: nowrap;overflow:hidden;text-overflow: ellipsis;\">";
 	
+	imgEl+="<div class=\"row\">";
+	imgEl+="<div class=\"cells col-centered\" style=\"max-width:600px\">";
+	
+	imgEl+="<div class=\"thumbnail\" style=\"white-space: nowrap;overflow:hidden;text-overflow: ellipsis;\">";
+	imgEl+="<div class=\"caption\">";
 	if ("${fn:escapeXml(galleryName)}"=="home"&&nickname =="")
 	{
-		imgEl+="Spherified by "+author;
+		imgEl+=author;
 	}
 	else if("${fn:escapeXml(galleryName)}"=="home")
 	{
-		imgEl+="Spherified by <b><a href='/gallery.jsp?gallery="+nickname+"'>"+author+"</a></b>";
+		imgEl+="<b><a href='/gallery.jsp?gallery="+nickname+"'>"+author+"</a></b>"
+
+	}
+	imgEl+="</div>"
+
+	imgEl+="<a target='_blank' href='/slideshow.jsp?gallery=${fn:escapeXml(galleryName)}&index="+index+"'>";
+	imgEl+="<img style=\"width:100%;\" src=\""+perma_url+"\" alt=\""+blob_key+"\"></a>";
+	imgEl+="<div class=\"caption\" style=\"font-weight: bold;color:#212e49;\" id=\"likes_"+index+"\">"+likes+"</div>";
+	if(description!="")
+	{
+		imgEl+="<div class=\"caption\"><b style=\"color:#1f3954;\">"+author+"</b>&nbsp;"+description+"</div>";
 	}
 	
-	imgEl+="<a target='_blank' href='/slideshow.jsp?gallery=${fn:escapeXml(galleryName)}&index="+index+"'>";
-	imgEl+="<img style=\"height:180px;\" src=\""+perma_url+"\" alt=\""+blob_key+"\"></a>";
-	imgEl+="<div class=\"caption\">"+description+"</div>";
-	imgEl+="<div class=\"input-group\"><span class=\"input-group-addon\" id=\"basic-addon1\"><span class=\"glyphicon glyphicon-link\"></span></span>";
-	imgEl+="<input type=\"text\" class=\"form-control\" value=\"http://www.spherify.co/render.html?blob-key="+blob_key+"\" aria-describedby=\"basic-addon1\">";
-		
+	
+	//imgEl+="<div class=\"input-group\">";
+	//imgEl+="<span class=\"input-group-addon\" id=\"basic-addon1\"><span class=\"glyphicon glyphicon-link\"></span></span>";
+	//imgEl+="<input type=\"text\" class=\"form-control\" value=\"http://www.spherify.co/render.html?blob-key="+blob_key+"\" aria-describedby=\"basic-addon1\">";
+	imgEl+="<div class=\"caption\">";	
 	if (you=="1")
 	{
-		imgEl+= "<span class=\"input-group-btn\">";
-		imgEl+= "<button class=\"btn btn-default type=\"button\" onclick=\"deleteImg("+sid+")\">&nbsp;<span class=\"glyphicon glyphicon-trash\"></span>&nbsp;</button></span>";
-		imgEl+= "<span class=\"input-group-btn\"><a href=\"/update.jsp?id="+sid+"\">";
-		imgEl+= "<button class=\"btn btn-default\" type=\"button\">&nbsp;<span class=\"glyphicon glyphicon-edit\"></span>&nbsp;</button></a></span>"
+		//imgEl+= "<span class=\"input-group-btn\">";
+		imgEl+= "<a href=\"/update.jsp?id="+sid+"\"><span class=\"glyphicon glyphicon-edit\" style=\"color:#2e6da4;\"></span></a>";
+		imgEl+= "&nbsp;&nbsp;<span onclick=\"deleteImg("+sid+")\" class=\"glyphicon glyphicon-trash\" style=\"color:#2e6da4;\"></span>";
+		
+		//imgEl+= "<button class=\"btn btn-default\" type=\"button\">&nbsp;<span class=\"glyphicon glyphicon-edit\"></span>&nbsp;</button></a></span>"
 	}
 	
-	imgEl+="</div></div></div>";
+	
+	else if("${fn:escapeXml(user.nickname)}"!="")
+	{
+		
+		if(liked=="1")
+		{
+			imgEl+="<span class=\"glyphicon glyphicon-heart\" style=\"color:#2e6da4;\"></span>"			
+		}
+		else
+		{
+			
+			imgEl+= "<span onclick=\"likeImg("+sid+","+index+")\" class=\"glyphicon glyphicon-heart-empty\" style=\"color:#2e6da4;\" id=\"likeIcon_"+index+"\"></span>";
+		}
+	}
+	else
+	{
+		imgEl+="<span class=\"glyphicon glyphicon-heart-empty\" style=\"color:gray;\"></span>";	
+	}
+	
+	imgEl+="<a href=\"http://www.spherify.co/render.html?blob-key="+blob_key+"\"><span class=\"glyphicon glyphicon-link pull-right\" style=\"color:#2e6da4;\"></span></a>"	
+	
+	imgEl+="</div></div></div></div></div>";
 	
 	$("#imgGrid").append(imgEl);
 }
@@ -264,6 +326,7 @@ Welcome!
 <p>No pictures in '${fn:escapeXml(galleryName)}'. Upload a sphere now!</p>
 <%
     } else {
+    	Collections.sort(imageRecords);
 %>
 <div class="container-fluid">
 
@@ -307,9 +370,21 @@ if(!galleryName.equals("home")) {
 </div>
  
 <% } else { %>
-<div class="panel panel-default list-group-item-info" id="info"><span class="glyphicon glyphicon-remove pull-right" onclick="$('#info').hide()"></span><span class="glyphicon glyphicon-info-sign"></span>Tap an image and place your phone in your cardboard to get started. Tap the screen to go to the next image in the gallery, or use left/right keys on PC.
-</div>
+<div class="panel panel-default list-group-item-info" id="info"><span class="glyphicon glyphicon-remove pull-right" onclick="$('#info').hide()"></span><span class="glyphicon glyphicon-info-sign"></span><span id="infotext"></span>
 
+
+</div>
+<script>
+
+if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+	 $('#infotext').html(" Tap an image and place your phone in your cardboard to get started. Tap the screen, or look at the arrows to navigate through photospheres in the gallery.");
+	}
+else{
+	//console.log("desktop");
+	
+	$('#infotext').html(" Click an image to get started. Use the left and right keys to navigate through photospheres in the gallery. For more fun, use a Google Cardboard!");
+}
+</script>
 <% } %>
 
  <%
@@ -317,13 +392,14 @@ if(!galleryName.equals("home")) {
       int index = 0;
         for (ImageRecord imageRecord : imageRecords) {
         	
-        	pageContext.setAttribute("index", index);
-            pageContext.setAttribute("perma_url", imageRecord.perma_url);
-            pageContext.setAttribute("blob_key", imageRecord.blob_key);
-            pageContext.setAttribute("you", "0");
+        	
+        	
+
             String author="";
             String author_id="";
             String nickname ="";
+            pageContext.setAttribute("you", "0");
+            
             if (imageRecord.author_nickname == null) {
                 author = "an anonymous person";
                 
@@ -336,7 +412,23 @@ if(!galleryName.equals("home")) {
                     pageContext.setAttribute("you", "1");
                 }
             }
+           // System.out.print(index);
+            //System.out.println(imageRecord.isUnlisted);
+         	if(imageRecord.isUnlisted.equals("yes")&&(user==null||!user.getNickname().equals(galleryName)))
+           	{
+           		//System.out.print(user.getNickname()+" "+galleryName);
+         		//System.out.println("unlisted");
+         		continue;
+           	}
+         	
+          	pageContext.setAttribute("index", index);
+            pageContext.setAttribute("perma_url", imageRecord.perma_url);
+            pageContext.setAttribute("blob_key", imageRecord.blob_key);
+
+            pageContext.setAttribute("liked", "0");
             pageContext.setAttribute("imageRecord_user", author);
+         	//System.out.println("");
+  
             String description;
             if (imageRecord.desc == null) {
                 description = "No description.";
@@ -348,6 +440,25 @@ if(!galleryName.equals("home")) {
             pageContext.setAttribute("author", author);
             pageContext.setAttribute("author_id", author_id);
             pageContext.setAttribute("nickname", imageRecord.author_nickname);
+            if(imageRecord.likes==1)
+            {
+            	pageContext.setAttribute("likes",Integer.toString(imageRecord.likes)+" like");
+            }
+            else if(imageRecord.likes>0)
+            {
+            	pageContext.setAttribute("likes",Integer.toString(imageRecord.likes)+" likes");
+            }
+            else
+            {
+            	pageContext.setAttribute("likes","");
+            }
+            
+            if(user != null && imageRecord.likedUsers.contains(user.getNickname()))
+            {
+            	//System.out.println("liked");
+            	pageContext.setAttribute("liked", "1");
+            }
+            
             index++;
 %>
 			<script>
@@ -359,8 +470,10 @@ if(!galleryName.equals("home")) {
 			image.you = "${fn:escapeXml(you)}";
 			image.blob_key = "${fn:escapeXml(blob_key)}";
 			image.index = "${fn:escapeXml(index)}";
-			image.perma_url = "${fn:escapeXml(perma_url)}";
-			images.sid = "${fn:escapeXml(sid)}";
+			image.perma_url = "${fn:escapeXml(perma_url)}"+"=s590-c";
+			image.likes = "${fn:escapeXml(likes)}";
+			image.liked = "${fn:escapeXml(liked)}";
+			//console.log(image.likes);
 			images.push(image);
 			</script>
 
@@ -371,12 +484,12 @@ if(!galleryName.equals("home")) {
 
 
 
-<div class="row" id="imgGrid">
+<div id="imgGrid">
 </div>
 
 <script>
 var index = 0;
-appendImg(images[index].author, images[index].nickname, images[index].description, images[index].perma_url, images[index].blob_key, images[index].index, images[index].sid,images[index].you);
+appendImg(images[index].author, images[index].nickname, images[index].description, images[index].perma_url, images[index].blob_key, images[index].index, images[index].sid,images[index].you,images[index].likes,images[index].liked);
 index++;
 nextPage();
 </script>

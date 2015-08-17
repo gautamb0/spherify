@@ -7,6 +7,7 @@ var camera, scene, renderer;
     var blobKey = getUrlParameter('blob-key');
     var localPath = getUrlParameter('local-path');
     var imagePath;
+    var sbs = false;
     if(blobKey!=null)
     {
     	 imagePath = "/serve?blob-key="+blobKey;
@@ -27,6 +28,7 @@ var camera, scene, renderer;
       container.appendChild(element);
       
       effect = new THREE.StereoEffect(renderer);
+      effect.separation = 0;
 	  effect.setSize(window.innerWidth/2,window.innerHeight);
 
       scene = new THREE.Scene();
@@ -62,7 +64,7 @@ var camera, scene, renderer;
         if (!e.alpha) {
           return;
         }
-
+        sbs = true;
         controls = new THREE.DeviceOrientationControls(camera, true);
         controls.connect();
         controls.update();
@@ -96,7 +98,14 @@ var camera, scene, renderer;
     }
 
     function render(dt) {
-      effect.render(scene, camera);
+      if(sbs)
+      {
+    		effect.render(scene, camera);
+      }
+      else
+      {
+    	  renderer.render(scene, camera);
+      }
     }
 
     function animate(t) {

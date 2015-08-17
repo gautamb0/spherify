@@ -1,8 +1,12 @@
 <%-- //[START all]--%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%-- //[START imports]--%>
-
+<%@ page import="com.google.appengine.api.users.User" %>
+<%@ page import="com.google.appengine.api.users.UserService" %>
+<%@ page import="com.google.appengine.api.users.UserServiceFactory" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Collections" %>
 <%@ page import="com.google.appengine.api.blobstore.BlobstoreServiceFactory" %>
 <%@ page import="com.google.appengine.api.blobstore.BlobstoreService" %>
 
@@ -10,10 +14,12 @@
 <%@ page import="com.example.test3.ImageRecord" %>
 <%@ page import="com.example.test3.Gallery" %>
 <%@ page import="com.googlecode.objectify.Key" %>
+<%@ page import="com.example.test3.Userbase" %>
+<%@ page import="com.example.test3.UserRecord" %>
 <%@ page import="com.googlecode.objectify.ObjectifyService" %>
 <%-- //[END imports]--%>
 
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 
 <html>
 <head>
@@ -46,7 +52,19 @@
   <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
   <script src="js/third-party/threejs/OrbitControls.js"></script>
   <script src="js/renderlocal.js"></script>
-  
+
+<script src="fonts/gentilis_bold.typeface.js"></script>
+<script src="fonts/gentilis_regular.typeface.js"></script>
+<script src="fonts/optimer_bold.typeface.js"></script>
+<script src="fonts/optimer_regular.typeface.js"></script>
+<script src="fonts/helvetiker_bold.typeface.js"></script>
+<script src="fonts/helvetiker_regular.typeface.js"></script>
+<script src="fonts/droid_sans_regular.typeface.js"></script>
+<script src="fonts/droid_sans_bold.typeface.js"></script>
+<script src="fonts/droid_serif_regular.typeface.js"></script>
+<script src="fonts/droid_serif_bold.typeface.js"></script>
+
+
   <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -67,6 +85,8 @@ var blob_keys = [];
     // Create the correct Ancestor key
       Key<Gallery> theBook = Key.create(Gallery.class, ancestor);
 	  List<ImageRecord> imageRecords;
+	  UserService userService = UserServiceFactory.getUserService();
+	  User user = userService.getCurrentUser();
     // Run an ancestor query to ensure we see the most up-to-date
     // view of the ImageRecords belonging to the selected Gallery.
       if(galleryName.equals("home")){
@@ -94,9 +114,15 @@ var blob_keys = [];
 <p>No pictures in '${fn:escapeXml(galleryName)}'. Upload a sphere now!</p>
 <%
     } else {
+    	Collections.sort(imageRecords);
 		for (ImageRecord imageRecord : imageRecords) {
 			pageContext.setAttribute("blob_key", imageRecord.blob_key);		
-
+			if(imageRecord.isUnlisted.equals("yes")&&(user==null||!user.getNickname().equals(galleryName)))
+           	{
+           		//System.out.print(user.getNickname()+" "+galleryName);
+         		//System.out.println("unlisted");
+         		continue;
+           	}
 %>
 <script>
 	blob_keys.push("${fn:escapeXml(blob_key)}");

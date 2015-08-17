@@ -21,6 +21,22 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 		<url-pattern>/upload</url-pattern>
 	</servlet-mapping>
 		<servlet>
+		<servlet-name>UpdateDB</servlet-name>
+		<servlet-class>com.example.test3.UpdateDB</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UpdateDB</servlet-name>
+		<url-pattern>/updatedb</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Likee</servlet-name>
+		<servlet-class>com.example.test3.Likee</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Likee</servlet-name>
+		<url-pattern>/like</url-pattern>
+	</servlet-mapping>
+	<servlet>
 		<servlet-name>Update</servlet-name>
 		<servlet-class>com.example.test3.Update</servlet-class>
 	</servlet>

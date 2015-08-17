@@ -1,14 +1,17 @@
 var camera, scene, renderer;
     var effect, controls;
     var element, container;
-    var star=null;
-    var star2=null;
+    var arrow=null;
+    var arrow2=null;
+    var prevMesh = null;
+    var nextMesh = null;
     var clock = new THREE.Clock();
     var iden = document.getElementById('iden').innerHTML;
     var mesh = null;
     var index = getUrlParameter('index');
     var nextTick = 0;
     var prevTick = 0;
+    var sbs = false;
     if(index==null)
     {
     	index = 0;
@@ -16,7 +19,7 @@ var camera, scene, renderer;
     var drag = false;
     function initlocal() {
       
-
+    	console.log(navigator.userAgent);
       //$("#examplee").on("tap",myFunction);
       renderer = new THREE.WebGLRenderer();
       element = renderer.domElement;
@@ -25,15 +28,7 @@ var camera, scene, renderer;
       
       effect = new THREE.StereoEffect(renderer);
 	  effect.setSize(window.innerWidth/2,window.innerHeight);
-	// Sphere parameters: radius, segments along width, segments along height
-		var sphereGeometry = new THREE.SphereGeometry( 2, 32, 32 );
-		var tetrahedronGeometry = new THREE.TetrahedronGeometry( 4, 1 );
-		tetrahedronGeometry.applyMatrix( new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 1, 0, -1 ).normalize(), Math.atan( Math.sqrt(2)) ) );
-		// use a "lambert" material rather than "basic" for realistic lighting.
-		//   (don't forget to add (at least one) light!)
-		var multiMaterial = new THREE.MeshLambertMaterial( {color: 0x8888ff} ); 
-		var sphere = new THREE.Mesh(tetrahedronGeometry, multiMaterial);
-		sphere.position.set(-60, 15, 60);
+
 
       scene = new THREE.Scene();
       
@@ -43,20 +38,20 @@ var camera, scene, renderer;
   	
   	
   	
-var starPoints = [];
+    var arrowPoints = [];
 	
-	starPoints.push( new THREE.Vector2 (  4,  0 ) );
+	arrowPoints.push( new THREE.Vector2 (  4,  0 ) );
 
-	starPoints.push( new THREE.Vector2 ( -1, 2 ) );
-	starPoints.push( new THREE.Vector2 ( -1, 1 ) );
-	starPoints.push( new THREE.Vector2 ( -5, 1 ) );
+	arrowPoints.push( new THREE.Vector2 ( -1, 2 ) );
+	arrowPoints.push( new THREE.Vector2 ( -1, 1 ) );
+	arrowPoints.push( new THREE.Vector2 ( -5, 1 ) );
 
-	starPoints.push( new THREE.Vector2 ( -5, -1 ) );
-	starPoints.push( new THREE.Vector2 ( -1, -1 ) );
-	starPoints.push( new THREE.Vector2 ( -1, -2 ) );
+	arrowPoints.push( new THREE.Vector2 ( -5, -1 ) );
+	arrowPoints.push( new THREE.Vector2 ( -1, -1 ) );
+	arrowPoints.push( new THREE.Vector2 ( -1, -2 ) );
 
 	
-	var starShape = new THREE.Shape( starPoints );
+	var arrowShape = new THREE.Shape( arrowPoints );
 
 	var extrusionSettings = {
 		size: 1, height: 1, curveSegments: 3,
@@ -64,20 +59,54 @@ var starPoints = [];
 		material: 0, extrudeMaterial: 1, amount: 2
 	};
 	
-	var starGeometry = new THREE.ExtrudeGeometry( starShape, extrusionSettings );
+	var arrowGeometry = new THREE.ExtrudeGeometry( arrowShape, extrusionSettings );
 	
-	var materialFront = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-	var materialSide = new THREE.MeshBasicMaterial( { color: 0xff8800 } );
+	var materialFront = new THREE.MeshBasicMaterial( { color: 0xFFFFCC , transparent: true, opacity: 0.6 } );
+	var materialSide = new THREE.MeshBasicMaterial( { color: 0xFFFFCC , transparent: true, opacity: 0.6 } );
 	var materialArray = [ materialFront, materialSide ];
-	var starMaterial = new THREE.MeshFaceMaterial(materialArray);
+	var arrowMaterial = new THREE.MeshFaceMaterial(materialArray);
 	
-	star = new THREE.Mesh( starGeometry, starMaterial );
-	star2 = new THREE.Mesh( starGeometry, starMaterial );
-	star.position.set(-60,14,50);  	  		
-	scene.add(star);
+	var textGeom = new THREE.TextGeometry( "Prev", 
+			{
+				size: 4, height: 1, curveSegments: 3,
+				font: "helvetiker", weight: "normal", style: "normal",
+				bevelThickness: 1, bevelSize: 1, bevelEnabled: false,
+				material: 0, extrudeMaterial: 1
+			});
+	
+			// font: helvetiker, gentilis, droid sans, droid serif, optimer
+			// weight: normal, bold
+			
+	var textMaterial = new THREE.MeshFaceMaterial(materialArray);
+	prevMesh = new THREE.Mesh(textGeom, textMaterial );
+	
+	textGeom.computeBoundingBox();
+	var textWidth = textGeom.boundingBox.max.x - textGeom.boundingBox.min.x;
+	prevMesh.position.set(-55,19,50);
+	prevMesh.rotation.y = -1.25*Math.PI;		
+	
+	textGeom = new THREE.TextGeometry( "Next", 
+			{
+				size: 4, height: 1, curveSegments: 3,
+				font: "helvetiker", weight: "normal", style: "normal",
+				bevelThickness: 1, bevelSize: 1, bevelEnabled: false,
+				material: 0, extrudeMaterial: 1
+			});
+	nextMesh = new THREE.Mesh(textGeom, textMaterial );
+	textGeom.computeBoundingBox();
+	textWidth = textGeom.boundingBox.max.x - textGeom.boundingBox.min.x;
+	nextMesh.position.set(-66,19,-50);
+	nextMesh.rotation.y = -1.75*Math.PI;	
+	
+
+	
+	arrow = new THREE.Mesh( arrowGeometry, arrowMaterial );
+	arrow2 = new THREE.Mesh( arrowGeometry, arrowMaterial );
+	arrow.position.set(-60,14,50);  	  		
+	//scene.add(arrow);
   	
-  	star2.position.set(-60,14,-50);
-  	scene.add(star2);
+  	arrow2.position.set(-60,14,-50);
+  	//scene.add(arrow2);
   	
   	
   	
@@ -107,21 +136,19 @@ var starPoints = [];
       
       document.getElementById("examplee").addEventListener("mousedown", function(){drag=false;});
       document.getElementById("examplee").addEventListener("mouseup", myFunction);
-      document.getElementById("examplee").addEventListener("mousemove", function(){drag=true;
+      document.getElementById("examplee").addEventListener("mousemove", function(){drag=true;});
       //console.log("("+camera.rotation._x+","+camera.rotation._y+","+camera.rotation._z+")");
 
-
-      });
       function setOrientationControls(e) {
         if (!e.alpha) {
           return;
         }
-        
+        sbs = true;
         controls = new THREE.DeviceOrientationControls(camera, true);
         controls.connect();
         controls.update();
 
-        container.addEventListener('click', console.log("clicj"), false);
+        //container.addEventListener('click', console.log("clicj"), false);
 
         window.removeEventListener('deviceorientation', setOrientationControls, true);
       }
@@ -146,34 +173,48 @@ var starPoints = [];
       resize();
 
       camera.updateProjectionMatrix();
-
+      
+      var vector = new THREE.Vector3( 0, 0, -1 );
+      vector.applyQuaternion( camera.quaternion );
+      if(arrow)
+      {
+    	  anglePrev = vector.angleTo( prevMesh.position );
+      }
+      if(arrow2)
+    {
+    	  angleNext = vector.angleTo( nextMesh.position );
+    }
+      
+      //console.log(anglePrev);
+      
+      
       controls.update(dt);
-    	if(camera.rotation._x>0&&camera.rotation._x<.2&&camera.rotation._y>.75&&camera.rotation._y<.95&&camera.rotation._z>-.15&&camera.rotation._z<.05)
+    	if(angleNext<.29)//(camera.rotation._x>0&&camera.rotation._x<.2&&camera.rotation._y>.75&&camera.rotation._y<.95&&camera.rotation._z>-.15&&camera.rotation._z<.05)
       	{
 
     		nextTick++;
-    		star2.rotation.x -= 0.05;
+    		arrow2.rotation.x -= 0.05;
       		if(nextTick>250)
       		{
-      			console.log("next");
+      			//console.log("next");
       			nextTick = 0;
       			nextSphere();
       		}
-      	} else if(camera.rotation._x>3&&camera.rotation._x<3.2&&camera.rotation._y>.75&&camera.rotation._y<.95&&camera.rotation._z>-3.2&&camera.rotation._z<-3)
+      	} else if(anglePrev<.29)//(camera.rotation._x>3&&camera.rotation._x<3.2&&camera.rotation._y>.75&&camera.rotation._y<.95&&camera.rotation._z>-3.2&&camera.rotation._z<-3)
       	{
-      	 	prevTick++;
-      	 	star.rotation.x -= 0.05;
+      		prevTick++;
+      	 	arrow.rotation.x -= 0.05;
       		if(prevTick>250)
       		{
-      			console.log("prev");
+      	//		console.log("prev");
       			prevTick = 0;
       			prevSphere();
       		}
       	}
       	else
       	{
-      		star.rotation.x = 0;
-      		star2.rotation.x = 0;
+      		arrow.rotation.x = 0;
+      		arrow2.rotation.x = 0;
       		nextTick = 0;
       		prevTick = 0;
       	}
@@ -182,7 +223,14 @@ var starPoints = [];
     }
 
     function render(dt) {
-      effect.render(scene, camera);
+    	if(sbs)
+    	{
+    		effect.render(scene, camera);
+    	}
+    	else
+    	{	
+    		renderer.render(scene, camera);
+    	}
     }
 
     function animate(t) {
@@ -238,28 +286,94 @@ var starPoints = [];
     
     
     function changeSphere(){
-    	if(mesh)
+     	if(mesh)
     	{
-    		scene.remove(mesh);
+    		console.log("remove mesh");
+     		scene.remove(mesh);
+    		
     	}
-    	var imagePath = "/serve?blob-key="+blob_keys[index];
-      	console.log(imagePath);
-    	var texture = THREE.ImageUtils.loadTexture(imagePath);
-      	var material = new THREE.MeshBasicMaterial({
-          map: texture
-        });
-        controls.rotateUp(Math.PI / 4);
-        controls.target.set(
-          camera.position.x + 0.1,
-          camera.position.y,
-          camera.position.z
-        );
-        var geometry = new THREE.SphereGeometry(100, 32, 32);
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.scale.x = -1;
-        
+     	var materialBlank = new THREE.MeshBasicMaterial( { color: 0x00000});
+     	var geometryBlank = new THREE.SphereGeometry(100, 32, 32);
+        mesh = new THREE.Mesh(geometryBlank, materialBlank);
         scene.add(mesh);
-      }
+     	if(arrow)
+    	{
+    		scene.remove(arrow);
+    	}
+     	if(arrow2)
+    	{
+    		scene.remove(arrow2);
+    	}
+     	if(prevMesh)
+    	{
+    		scene.remove(prevMesh);
+    	}
+     	if(nextMesh)
+    	{
+    		scene.remove(nextMesh);
+    	}
+     	
+    	var loader = new THREE.ImageLoader();
+    	
+    	
+    	var imagePath = "/serve?blob-key="+blob_keys[index];
+    	var textur = THREE.ImageUtils.loadTexture(imagePath);
+    	console.log(textur);
+    	console.log(imagePath);
+    	// load a image resource
+    	loader.load(
+    		// resource URL
+    		imagePath,
+    		// Function when resource is loaded
+    		function ( image ) {
+    			// do something with it
+    			scene.remove(mesh);
+    			var texture = new THREE.Texture();
+    			texture.image = image;
+    			console.log(texture);
+    			console.log("load complete");
+              	var material = new THREE.MeshBasicMaterial({
+                    map: textur
+                  });
+              	console.log("material");
+                  //controls.rotateUp(Math.PI / 4);
+                  //controls.target.set(
+                  //  camera.position.x + 0.1,
+                  //  camera.position.y,
+                  //  camera.position.z
+                  //);
+                  var geometry = new THREE.SphereGeometry(100, 32, 32);
+                  mesh = new THREE.Mesh(geometry, material);
+                  mesh.scale.x = -1;
+                  
+                  scene.add(mesh);
+                  if(sbs)
+                  {
+                	  scene.add(arrow);
+                      scene.add(arrow2);
+                  	scene.add(prevMesh);
+                	scene.add(nextMesh);
+                  }                
+    		},
+    		// Function called when download progresses
+    		function ( xhr ) {
+    			console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+    		},
+    		// Function called when download errors
+    		function ( xhr ) {
+    			console.log( 'An error happened' );
+    		}
+    	);
+    	
+   
+    	
+      	
+    	//var texture = THREE.ImageUtils.loadTexture(imagePath,{},function(){
+    //	}
+    	//while (texture.image.width == 0);
+
+
+    }
     
     document.addEventListener("keydown", keyboardResponse, false);
     
@@ -268,21 +382,13 @@ var starPoints = [];
         switch(e.keyCode) {
             case 37:
                 // left key pressed
-            	if(index>0)
-            	{
-            		index--;
-            		changeSphere();
-            	}
+            	prevSphere()
                 break;
             case 38:
                 // up key pressed
                 break;
             case 39:
-            	if(index<blob_keys.length-1)
-            	{
-            		index++;
-            		changeSphere();
-            	}
+            	nextSphere();
                 // right key pressed
                 break;
             case 40:
@@ -295,6 +401,6 @@ var starPoints = [];
     	if(!drag)
     	{
     	nextSphere();
-        console.log("click");
+        //console.log("click");
     	}
     }
