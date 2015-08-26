@@ -72,7 +72,15 @@
 %>
 
 <body style="background-color:#f9f9f9;">
- 	<script src="js/third-party/jquery-1.11.3.min.js"></script>
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.4";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+ 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
 	<script>
 	function getUrlParameter(sParam)
@@ -122,7 +130,11 @@
    </div>
 </nav>
 
-
+<script>
+var imgEl = "";
+var regexp = new RegExp('#([^\\s]*)','g');
+var pureDesc = "${fn:escapeXml(desc)}".replace(regexp, '');
+$("#reddit").attr("href", "http://www.google.com/")</script>
 <nav>
 <div class = "container-fluid page-header" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
 Editing as: ${fn:escapeXml(nickname)}</div>
@@ -142,14 +154,18 @@ Editing as: ${fn:escapeXml(nickname)}</div>
   <input type="hidden" class="form-control" name="sid" aria-label="sid-field" value="${fn:escapeXml(sid)}"/>
   <input type="submit" class="form-control" aria-label="submit-button" value="Submit">
 </form>
-
+    <div class="fb-share-button" 
+        data-href="/render.jsp?sid=${fn:escapeXml(sid)}" 
+        data-layout="button">
+    </div>
+    <a target="_blank" id="reddit"> <img src="//www.redditstatic.com/spreddit7.gif" alt="submit to reddit"/> </a>
  <div class="input-group">
   		<span class="input-group-addon" id="basic-addon1">Share:</span>
-  		<input type="text" class="form-control" value="http://www.spherify.co/render.html?blob-key=${fn:escapeXml(blob_key)}" aria-describedby="basic-addon1">
+  		<input type="text" class="form-control" value="http://www.spherify.co/render.jsp?sid=${fn:escapeXml(sid)}" aria-describedby="basic-addon1">
 </div>
  <div class="input-group">
   		<span class="input-group-addon" id="basic-addon1">Embed:</span>
-  		<input type="text" class="form-control" value='<iframe src="http://www.spherify.co/render.html?blob-key=${fn:escapeXml(blob_key)}" style="border:none" width="640" height="400"</iframe>' aria-describedby="basic-addon1">
+  		<input type="text" class="form-control" value='<iframe src="http://www.spherify.co/render.jsp?sid=${fn:escapeXml(sid)}" style="border:none" width="640" height="400"</iframe>' aria-describedby="basic-addon1">
 </div>
 
 
@@ -197,7 +213,12 @@ else
 		document.getElementById("notUnlisted").checked = true;
 	}
 }
-</script>
+
+var imgEl = "";
+var regexp = new RegExp('#([^\\s]*)','g');
+var pureDesc = "${fn:escapeXml(desc)}".replace(regexp, '');
+$("#reddit").attr("href", "//www.reddit.com/submit?title="+pureDesc+"&url=www.spherify.co/render.jsp?sid=${fn:escapeXml(sid)}")</script>
+
 
 
  </body>

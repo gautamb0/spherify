@@ -15,7 +15,7 @@
 <%@ page import="com.googlecode.objectify.ObjectifyService" %>
 <%-- //[END imports]--%>
 
-<%@ page import="java.util.List" %>
+<%@ page import="java.util.List" %>	
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <html>
@@ -45,7 +45,7 @@
 %>
 
 <body style="background-color:#f9f9f9;">
- 	<script src="js/third-party/jquery-1.11.3.min.js"></script>
+ 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
  	<div id="iden" style="display: none;">1</div>
     <div id="example"></div>
@@ -54,7 +54,7 @@
   <script src="js/third-party/threejs/StereoEffect.js"></script>
   <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
   <script src="js/third-party/threejs/OrbitControls.js"></script>
-  <script src="js/renderlocal.js"></script>
+  <script src="js/render.js"></script>
 <nav class="navbar navbar-default" style="margin-bottom: 0;">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -100,7 +100,7 @@ Uploading as: ${fn:escapeXml(nickname)}</div>
  <output id="list"></output>
 </div>     
 <script>
-
+var img;
  $(function () {
     $(":file").change(function () {
 		var parent = document.getElementById('list');
@@ -122,12 +122,34 @@ function imageIsLoaded(e) {
     //initlocal(e.target.result);
     //animate();
     //$('#imgContainer').show();
-    
+    img = e.target.result;
     var span = document.createElement('span');
-    span.innerHTML = ['<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3"><div class="thumbnail"><img id="myImg" src="',e.target.result,'" alt="your image" /></img></div></div>'].join('');
+    span.innerHTML = ['<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" id="loadedimg"><div class="thumbnail" ><img id="myImg" src="',img,'" alt="your image" /></img></div></div>'].join('');
 	document.getElementById('list').insertBefore(span, list.childNodes[0]);
 };
 
+function loadvr()
+{
+	console.log("start render");
+	$('#loadedimg').hide();
+	$('.navbar').hide();
+	$('.subnav').hide();
+	$('.input-group').hide();
+	var ex = document.getElementById("example");
+	var body = document.getElementsByTagName("BODY")[0];
+	ex.style.position ="absolute";
+	ex.style.top ="0";
+	ex.style.left ="0";
+	ex.style.right ="0";
+	ex.style.bottom ="0";
+	//ex.style.height ="240px";
+	//ex.style.width ="320px";
+	body.style.margin="0px";
+	body.overflow="hidden";
+	console.log("change style");
+	init(img);
+	animate();
+}
 
 </script>
  </body>

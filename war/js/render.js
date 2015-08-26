@@ -3,25 +3,29 @@ var camera, scene, renderer;
     var element, container;
     
     var clock = new THREE.Clock();
-    var iden = document.getElementById('iden').innerHTML;
+    //var iden = document.getElementById('iden');
     var blobKey = getUrlParameter('blob-key');
-    var localPath = getUrlParameter('local-path');
+    
     var imagePath;
     var sbs = false;
+    //console.log("blob key ${fn:escapeXml(blob_key)}");
     if(blobKey!=null)
     {
     	 imagePath = "/serve?blob-key="+blobKey;
+    	 init(imagePath);
+    	 animate();
     }
-    else
-    {
-    	imagePath = localPath;
-    }
-    console.log(blobKey);
-    console.log(imagePath);
-    init();
-    animate();
 
-    function init() {
+
+    //
+
+    function init(imagePath) {
+   //if((/CriOS/i.test(navigator.userAgent))){
+   // 	iden.innerHTML="chrome ios";}
+    //else
+    //	{
+    //iden.innerHTML="not chrome on ios";
+    //}
       renderer = new THREE.WebGLRenderer();
       element = renderer.domElement;
       container = document.getElementById('example');
@@ -59,7 +63,7 @@ var camera, scene, renderer;
         mesh.scale.x = -1;
         
         scene.add(mesh);
-        
+      
       function setOrientationControls(e) {
         if (!e.alpha) {
           return;
@@ -74,13 +78,26 @@ var camera, scene, renderer;
         window.removeEventListener('deviceorientation', setOrientationControls, true);
       }
      
+      if(!(/CriOS/i.test(navigator.userAgent)))
+      {
       window.addEventListener('resize', resize, false);
+      }
       setTimeout(resize, 1);
     }
 
     function resize() {
-      var width = container.offsetWidth;
-      var height = container.offsetHeight;
+      var width;
+      var height;
+      if(/CriOS/i.test(navigator.userAgent))
+      {
+          width = screen.height;
+          height = screen.width+50;
+      }
+      else
+      {
+          width = container.offsetWidth;
+          height = container.offsetHeight;
+      }
 
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
@@ -90,10 +107,11 @@ var camera, scene, renderer;
     }
 
     function update(dt) {
-      resize();
-
-      camera.updateProjectionMatrix();
-
+    	if(!(/CriOS/i.test(navigator.userAgent)))
+        {
+    		resize();
+    		camera.updateProjectionMatrix();
+        }
       controls.update(dt);
     }
 

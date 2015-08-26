@@ -1,8 +1,9 @@
-      body {
+      
+      if[CriOS] body {
         margin: 0px;
         overflow: hidden;
       }
-      #example {
+      if[CriOS] #example {
         position: absolute;
         top: 0;
         left: 0;

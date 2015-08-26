@@ -23,6 +23,7 @@ import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.Key;
 
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -51,7 +52,9 @@ public class ImageRecord implements Comparable<ImageRecord> {
   public String perma_url;
   public String desc;
   public int likes;
+  public int views;
   public List<String> likedUsers;
+  @Index public List<String> tags;
   
   @Index public String isPrivate;
   public String isUnlisted;
@@ -62,11 +65,13 @@ public class ImageRecord implements Comparable<ImageRecord> {
    **/
   public ImageRecord() {
 	desc = "";
-	likedUsers = new Vector<String>();;
+	likedUsers = new Vector<String>();
+	tags = new ArrayList<String>();
 	isPrivate = "yes";
 	isUnlisted = "yes";
     date = new Date();
     likes = 0;
+    views = 0;
   }
 
   /**

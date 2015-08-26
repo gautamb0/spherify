@@ -5,6 +5,8 @@ var camera, scene, renderer;
     var arrow2=null;
     var prevMesh = null;
     var nextMesh = null;
+    var loadingMesh = null;
+    var loadMesh2 = null;
     var clock = new THREE.Clock();
     var iden = document.getElementById('iden').innerHTML;
     var mesh = null;
@@ -27,6 +29,7 @@ var camera, scene, renderer;
       container.appendChild(element);
       
       effect = new THREE.StereoEffect(renderer);
+      effect.separation = 0;
 	  effect.setSize(window.innerWidth/2,window.innerHeight);
 
 
@@ -82,9 +85,9 @@ var camera, scene, renderer;
 	
 	textGeom.computeBoundingBox();
 	var textWidth = textGeom.boundingBox.max.x - textGeom.boundingBox.min.x;
-	prevMesh.position.set(-55,19,50);
+	prevMesh.position.set(-55,20,50);
 	prevMesh.rotation.y = -1.25*Math.PI;		
-	
+	//scene.add(prevMesh);
 	textGeom = new THREE.TextGeometry( "Next", 
 			{
 				size: 4, height: 1, curveSegments: 3,
@@ -95,10 +98,9 @@ var camera, scene, renderer;
 	nextMesh = new THREE.Mesh(textGeom, textMaterial );
 	textGeom.computeBoundingBox();
 	textWidth = textGeom.boundingBox.max.x - textGeom.boundingBox.min.x;
-	nextMesh.position.set(-66,19,-50);
+	nextMesh.position.set(-66,20,-50);
 	nextMesh.rotation.y = -1.75*Math.PI;	
 	
-
 	
 	arrow = new THREE.Mesh( arrowGeometry, arrowMaterial );
 	arrow2 = new THREE.Mesh( arrowGeometry, arrowMaterial );
@@ -106,6 +108,30 @@ var camera, scene, renderer;
 	//scene.add(arrow);
   	
   	arrow2.position.set(-60,14,-50);
+  	
+  	
+
+	textGeom = new THREE.TextGeometry( "Loading", 
+			{
+				size: 8, height: 1, curveSegments: 3,
+				font: "helvetiker", weight: "normal", style: "normal",
+				bevelThickness: 1, bevelSize: 1, bevelEnabled: false,
+				material: 0, extrudeMaterial: 1
+			});
+	materialFront = new THREE.MeshBasicMaterial( { color: 0xFF0000 } );
+	materialSide = new THREE.MeshBasicMaterial( { color: 0xFF0000 } );
+	materialArray = [ materialFront, materialSide ];
+	textMaterial = new THREE.MeshFaceMaterial(materialArray);
+	loadingMesh = new THREE.Mesh(textGeom, textMaterial );
+	textGeom.computeBoundingBox();
+	textWidth = textGeom.boundingBox.max.x - textGeom.boundingBox.min.x;
+	loadingMesh.position.set(-70,13,20);
+	loadingMesh.rotation.y = -1.5*Math.PI;	
+	//scene.add(loadingMesh);
+	loadingMesh2 = new THREE.Mesh(textGeom, textMaterial );
+	loadingMesh2.rotation.y = 1.5*Math.PI;
+	loadingMesh2.position.set(70,-22,0);
+	
   	//scene.add(arrow2);
   	
   	
@@ -138,12 +164,13 @@ var camera, scene, renderer;
       document.getElementById("examplee").addEventListener("mouseup", myFunction);
       document.getElementById("examplee").addEventListener("mousemove", function(){drag=true;});
       //console.log("("+camera.rotation._x+","+camera.rotation._y+","+camera.rotation._z+")");
-
+    
       function setOrientationControls(e) {
         if (!e.alpha) {
           return;
         }
         sbs = true;
+     
         controls = new THREE.DeviceOrientationControls(camera, true);
         controls.connect();
         controls.update();
@@ -152,16 +179,31 @@ var camera, scene, renderer;
 
         window.removeEventListener('deviceorientation', setOrientationControls, true);
       }
-     
-      window.addEventListener('resize', resize, false);
+      if(!(/CriOS|Android/i.test(navigator.userAgent)))
+      {
+    	  window.addEventListener('resize', resize, false);
+      }
+      
       setTimeout(resize, 1);
       changeSphere();
     }	
     
     function resize() {
-      var width = container.offsetWidth;
-      var height = container.offsetHeight;
+      var width;
+      
+      var height;
 
+      if(/CriOS|Android/i.test(navigator.userAgent))
+      {
+          width = screen.height;
+          height = screen.width+150;
+      }
+      else
+      {
+          width = container.offsetWidth;
+          height = container.offsetHeight;
+      }
+      
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
 
@@ -170,19 +212,21 @@ var camera, scene, renderer;
     }
 
     function update(dt) {
-      resize();
+    if(!(/CriOS|Android/i.test(navigator.userAgent)))
+    {
+    	resize();
 
       camera.updateProjectionMatrix();
-      
+    }
       var vector = new THREE.Vector3( 0, 0, -1 );
       vector.applyQuaternion( camera.quaternion );
       if(arrow)
       {
-    	  anglePrev = vector.angleTo( prevMesh.position );
+    	  anglePrev = vector.angleTo( arrow.position );
       }
       if(arrow2)
     {
-    	  angleNext = vector.angleTo( nextMesh.position );
+    	  angleNext = vector.angleTo( arrow2.position );
     }
       
       //console.log(anglePrev);
@@ -294,8 +338,10 @@ var camera, scene, renderer;
     	}
      	var materialBlank = new THREE.MeshBasicMaterial( { color: 0x00000});
      	var geometryBlank = new THREE.SphereGeometry(100, 32, 32);
-        mesh = new THREE.Mesh(geometryBlank, materialBlank);
-        scene.add(mesh);
+        var mesh2 = new THREE.Mesh(geometryBlank, materialBlank);
+        scene.add(mesh2);
+        scene.add(loadingMesh);
+        scene.add(loadingMesh2);
      	if(arrow)
     	{
     		scene.remove(arrow);
@@ -317,6 +363,7 @@ var camera, scene, renderer;
     	
     	
     	var imagePath = "/serve?blob-key="+blob_keys[index];
+    	
     	var textur = THREE.ImageUtils.loadTexture(imagePath);
     	console.log(textur);
     	console.log(imagePath);
@@ -326,8 +373,12 @@ var camera, scene, renderer;
     		imagePath,
     		// Function when resource is loaded
     		function ( image ) {
+    			xmlhttp=new XMLHttpRequest();
+    			xmlhttp.open("POST","/view",true);
+    			xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    			xmlhttp.send("sid="+sids[index]);
     			// do something with it
-    			scene.remove(mesh);
+    			scene.remove(mesh2);
     			var texture = new THREE.Texture();
     			texture.image = image;
     			console.log(texture);
@@ -353,7 +404,9 @@ var camera, scene, renderer;
                       scene.add(arrow2);
                   	scene.add(prevMesh);
                 	scene.add(nextMesh);
-                  }                
+                  }
+                  scene.remove(loadingMesh);
+                  scene.remove(loadingMesh2);
     		},
     		// Function called when download progresses
     		function ( xhr ) {

@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 
-public class Likee extends HttpServlet {
+public class View extends HttpServlet {
 	  
 	  public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		  ImageRecord imageRecord; 	
@@ -27,10 +27,10 @@ public class Likee extends HttpServlet {
 		  Long id = Long.parseLong(sid);
 		  Key<Gallery> theBook = Key.create(Gallery.class, ancestor);
 		  imageRecord = ObjectifyService.ofy().load().type(ImageRecord.class).parent(theBook).id(id).now();
-
-		  imageRecord.likes++;
-		  imageRecord.likedUsers.add(user_nickname);
-		  //System.out.print(imageRecord.likedUsers);
+		  
+ 		  imageRecord.views++;
+		  
+ 		  //System.out.println("views "+ imageRecord.views);
 		  ObjectifyService.ofy().save().entity(imageRecord).now();		  
 		  
 	  }

@@ -29,19 +29,28 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Spherify - An easy-to-use Photosphere viewer and sharing service for Cardboard that works with any phone in the browser.">
+    <meta name="description" content="Spherify - An easy-to-use Photosphere viewer and sharing service for Google Cardboard that works with any phone in the browser.">
 	<style>.col-centered{
 float: none;
 margin: 0 auto;
-}</style>
+}
+.ui-selectmenu-button {
+    width: auto !important;
+}
+
+
+
+</style>
 </head>
 
 <%
     String galleryName = request.getParameter("gallery");
+	String tag = request.getParameter("tag");
     String ancestor = "default";
     if (galleryName == null) {
         galleryName = "home";
     }
+    
     pageContext.setAttribute("galleryName", galleryName);
     UserService userService = UserServiceFactory.getUserService();
     User user = userService.getCurrentUser();
@@ -50,9 +59,17 @@ margin: 0 auto;
 
 
 <body style="background-color:#f9f9f9;">
- 	<script src="js/third-party/jquery-1.11.3.min.js"></script>
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.4";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+ 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
-    <script src="js/third-party/equalize.min.js"></script>
+    <script src="js/third-party/imagesloaded.pkgd.min.js"></script>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -93,6 +110,21 @@ function deleteImg(sid) {
     }
 }
 
+function toggleSearch(state)
+{
+	console.log(state);
+	if(state=="1")
+	{
+		$('#navbarDefault').hide();
+		$('#navbarSearch').show();
+	}
+	else
+	{
+		$('#navbarDefault').show();
+		$('#navbarSearch').hide();
+	}
+
+}
 
 function showEdit() {
 	$('#bio').hide();
@@ -117,8 +149,10 @@ function saveBio()
 
 function nextPage()
 {
-	numCols = Math.floor(screen.width/$('.cells').width());
+	numCols = 1;//Math.floor(screen.width/$('.cells').width());
 	numRows = Math.ceil(screen.height/$('.cells').height());
+	//console.log($('.cells').height());
+	//console.log(screen.height);
 	picsPerPage = numCols * numRows;
 	//console.log(numCols);
 	//console.log(numRows);
@@ -129,7 +163,7 @@ function nextPage()
 		{
 			break;
 		}
-		appendImg(images[index].author, images[index].nickname, images[index].description, images[index].perma_url, images[index].blob_key, images[index].index, images[index].sid,images[index].you,images[index].likes,images[index].liked);
+		appendImg(images[index].author, images[index].nickname, images[index].description, images[index].perma_url, images[index].blob_key, images[index].index, images[index].sid,images[index].you,images[index].likes,images[index].liked,images[index].views);
 		index++;
 	}
 
@@ -144,38 +178,62 @@ $(window).scroll(function () {
 });
 
 </script>
-<nav class="navbar navbar-default" style="margin-bottom: 0;">
+<nav class="navbar navbar-default" id="navbarDefault" style="margin-bottom: 0;">
   <div class="container-fluid">
+  
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header pull-left">
       <a class="navbar-brand" href="/"><img src="/images/logo.jpg" alt="spherify" style="object-fit: contain;height: 40px;"></img></a>
+      
     </div>
+
     <!-- 'Sticky' (non-collapsing) right-side menu item(s) -->
     <div class="navbar-header pull-right">
       <ul class="nav pull-left">
+		<li class="pull-right">
+          <a onclick="toggleSearch('1')" style="color:#fff; margin-top: 15px; border:5px; padding:5px"><span class="glyphicon glyphicon-search"></span></a>
+        </li>
         <li class="pull-right">
+    
 <%
     if (user != null) {
       pageContext.setAttribute("user", user);
       pageContext.setAttribute("user_id", user.getUserId());
 %>
-          <a href="/gallery.jsp?gallery=${fn:escapeXml(user.nickname)}" style="color:#fff; margin-top: 5px;">
+          <a href="/gallery.jsp?gallery=${fn:escapeXml(user.nickname)}" style="color:#fff; margin-top: 15px; border:5px; padding:5px">
 <%
 	} else {
 %>          
-          <a href="<%= userService.createLoginURL(request.getRequestURI()) %>" style="color:#fff; margin-top: 5px;">
+          <a href="<%= userService.createLoginURL(request.getRequestURI()) %>" style="color:#fff; margin-top: 15px; border:5px; padding:5px">
 <%
 	}
 %>          
           <span class="glyphicon glyphicon-user"></span></a>
         </li>
         <li class="pull-right">
-          <a href="/upload.jsp" style="color:#fff; margin-top: 5px;"><span class="glyphicon glyphicon-upload"></span></a>
+          <a href="/upload.jsp" style="color:#fff; margin-top: 15px; border:5px; padding:5px"><span class="glyphicon glyphicon-upload"></span></a>
         </li>
+
       </ul>
 	  </div>
      </div>
 </nav>
+<nav class="navbar navbar-default" id="navbarSearch" style="margin-bottom: 0; display:none;">
+<div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    	<form class="navbar-form navbar-left" style="margin:0px;border:0px;padding:8px;"role="search">
+          <div class="input-group">
+          <input type="text" class="form-control" name="tag" placeholder="Search tags">
+    		<span class="input-group-btn">
+          	<a onclick="toggleSearch('0')" class="btn btn-default">Cancel</a>
+          	</span>
+          </div>          
+        </form>
+
+ </div>
+ 
+</nav>
+
 <script>
 
 function likeImg(sid, index)
@@ -206,9 +264,22 @@ function likeImg(sid, index)
 }
 
 
-function appendImg(author, nickname, description, perma_url, blob_key, index, sid, you, likes, liked)
+function appendImg(author, nickname, description, perma_url, blob_key, index, sid, you, likes, liked, views, callback)
 {
+	//console.log(callback);
 	var imgEl = "";
+	
+	var regexp = new RegExp('#([A-Za-z]+)','g');
+	var pureDesc = description.replace(regexp, '');
+	var tags =[];
+	tags = description.match(regexp);
+	var taglinks = "";
+	if(tags!=null){
+		for(var i=0;i<tags.length;i++)
+		{
+			taglinks += "<b><a href='/gallery.jsp?tag="+tags[i].substr(1)+"'>&nbsp;"+tags[i]+"</a></b>";
+		}
+	}
 	
 	imgEl+="<div class=\"row\">";
 	imgEl+="<div class=\"cells col-centered\" style=\"max-width:600px\">";
@@ -228,10 +299,17 @@ function appendImg(author, nickname, description, perma_url, blob_key, index, si
 
 	imgEl+="<a target='_blank' href='/slideshow.jsp?gallery=${fn:escapeXml(galleryName)}&index="+index+"'>";
 	imgEl+="<img style=\"width:100%;\" src=\""+perma_url+"\" alt=\""+blob_key+"\"></a>";
-	imgEl+="<div class=\"caption\" style=\"font-weight: bold;color:#212e49;\" id=\"likes_"+index+"\">"+likes+"</div>";
-	if(description!="")
+	imgEl+="<div class=\"caption\" style=\"font-weight: bold;color:#212e49;\">";
+	if(views!="")
 	{
-		imgEl+="<div class=\"caption\"><b style=\"color:#1f3954;\">"+author+"</b>&nbsp;"+description+"</div>";
+		imgEl+="<span>"+views+"</span>";
+	}
+	console.log(views);
+	imgEl+="<span id=\"likes_"+index+"\">"+likes+"</span>";
+	imgEl+="</div>"
+	if(pureDesc!=""||taglinks!="")
+	{
+		imgEl+="<div class=\"caption\">"+pureDesc+taglinks+"</div>";
 	}
 	
 	
@@ -266,12 +344,22 @@ function appendImg(author, nickname, description, perma_url, blob_key, index, si
 	{
 		imgEl+="<span class=\"glyphicon glyphicon-heart-empty\" style=\"color:gray;\"></span>";	
 	}
-	
-	imgEl+="<a href=\"http://www.spherify.co/render.html?blob-key="+blob_key+"\"><span class=\"glyphicon glyphicon-link pull-right\" style=\"color:#2e6da4;\"></span></a>"	
-	
-	imgEl+="</div></div></div></div></div>";
-	
+	//imgEl+="<a target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=www.spherify.co/render.jsp?sid="+sid+"'<span class=\"glyphicon glyphicon-share pull-right\" style=\"color:#2e6da4;\"></span></a>";
+	//imgEl+="<a target='_blank' href='https://www.reddit.com/submit?title="+description+"&url=www.spherify.co/render.jsp?sid="+sid+"'<span class=\"glyphicon glyphicon-share pull-right\" style=\"color:#2e6da4;\"></span></a>";
+	//imgEl+="<select id=\"selectId\">";
+	//imgEl+="<option>The 1st Option</option>";
+	//imgEl+="<option>The 2nd Option</option>";
+	//imgEl+="</select>";
+	imgEl+="<span class=\"glyphicon glyphicon-link pull-right\" style=\"color:#2e6da4; margin:2px;\" data-toggle=\"modal\" data-target=\"#myModal\" onclick=\"$('#share_modal').val('www.spherify.co/render.jsp?sid="+sid+"');\"></span>"
+	imgEl+="<div class=\"pull-right\"><a target='_blank' href='//www.reddit.com/submit?title="+pureDesc+"&url=www.spherify.co/render.jsp?sid="+sid+"'> <img src=\"//www.redditstatic.com/spreddit4.gif\" width=\"14\" height=\"14\" alt=\"submit to reddit\" style=\"margin:2px;\" /> </a></div>"
+	imgEl+="<div class=\"pull-right\"><a target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=/render.jsp?sid="+sid+"'><img class=\"img\" src=\"https://static.xx.fbcdn.net/rsrc.php/v2/yQ/r/7GFXgco-uzw.png\" alt=\"fb\" width=\"14\" height=\"14\" style=\"margin:2px;\"></a></div>"
+	imgEl+="</div></div></div></div>";
+
 	$("#imgGrid").append(imgEl);
+	
+    if (callback && typeof(callback) === "function") {
+        callback();
+    }
 }
 </script>
 <div class = "subnav" style="background-color:#b0bed9;width: 100%;margin:auto;padding:5px;color:#212e49;">
@@ -301,7 +389,17 @@ Welcome!
 	  List<ImageRecord> imageRecords;
     // Run an ancestor query to ensure we see the most up-to-date
     // view of the ImageRecords belonging to the selected Gallery.
-      if(galleryName.equals("home")){
+      if(!(tag==null)){
+         imageRecords = ObjectifyService.ofy()
+          .load()
+          .type(ImageRecord.class) // We want only ImageRecords
+          .ancestor(theBook)    // Anyone in this book
+          .order("-date")       // Most recent first - date is indexed.
+          .filter("isPrivate", "no")
+          .filter("tags", tag.toLowerCase())
+          .list();
+      }
+      else if(galleryName.equals("home")){
          imageRecords = ObjectifyService.ofy()
           .load()
           .type(ImageRecord.class) // We want only ImageRecords
@@ -323,7 +421,7 @@ Welcome!
 
     if (imageRecords.isEmpty()) {
 %>
-<p>No pictures in '${fn:escapeXml(galleryName)}'. Upload a sphere now!</p>
+<p>No results found.</p>
 <%
     } else {
     	Collections.sort(imageRecords);
@@ -407,7 +505,7 @@ else{
                 author = imageRecord.author_nickname;
                 author_id = imageRecord.author_id;
                 nickname = imageRecord.author_nickname;
-                if (user != null && user.getUserId().equals(author_id)) {
+                if (user != null && (user.getUserId().equals(author_id))) {
                     author += " (You)";
                     pageContext.setAttribute("you", "1");
                 }
@@ -440,6 +538,7 @@ else{
             pageContext.setAttribute("author", author);
             pageContext.setAttribute("author_id", author_id);
             pageContext.setAttribute("nickname", imageRecord.author_nickname);
+            
             if(imageRecord.likes==1)
             {
             	pageContext.setAttribute("likes",Integer.toString(imageRecord.likes)+" like");
@@ -459,6 +558,15 @@ else{
             	pageContext.setAttribute("liked", "1");
             }
             
+            if(imageRecord.views>49)
+            {
+            	pageContext.setAttribute("views",Integer.toString(imageRecord.views)+" views ");
+            }
+            else
+            {
+            	pageContext.setAttribute("views","");
+            }
+            
             index++;
 %>
 			<script>
@@ -472,6 +580,7 @@ else{
 			image.index = "${fn:escapeXml(index)}";
 			image.perma_url = "${fn:escapeXml(perma_url)}"+"=s590-c";
 			image.likes = "${fn:escapeXml(likes)}";
+			image.views = "${fn:escapeXml(views)}";
 			image.liked = "${fn:escapeXml(liked)}";
 			//console.log(image.likes);
 			images.push(image);
@@ -487,11 +596,41 @@ else{
 <div id="imgGrid">
 </div>
 
+  <div class="modal" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Share Permalink</h4>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="form-control" id="share_modal" value="" aria-describedby="basic-addon1">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
 <script>
 var index = 0;
-appendImg(images[index].author, images[index].nickname, images[index].description, images[index].perma_url, images[index].blob_key, images[index].index, images[index].sid,images[index].you,images[index].likes,images[index].liked);
-index++;
-nextPage();
+
+function init(){
+	
+	imagesLoaded( $('.cells'), function( instance ) {
+
+			index++;
+			nextPage();
+		});
+
+}
+
+appendImg(images[index].author, images[index].nickname, images[index].description, images[index].perma_url, images[index].blob_key, images[index].index, images[index].sid,images[index].you,images[index].likes,images[index].liked,images[index].views,init);
+
+
 </script>
 </div>
 </body>
